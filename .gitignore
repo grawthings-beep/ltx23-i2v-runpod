@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+*.log
+workspace/
+models/
+input/
+output/
+temp/
+.cache/
+.DS_Store

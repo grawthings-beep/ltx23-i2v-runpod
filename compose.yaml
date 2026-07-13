@@ -1,0 +1,24 @@
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ltx23-i2v-runpod:local
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATA_ROOT: /workspace
+      COMFY_PORT: "8188"
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./workspace:/workspace
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

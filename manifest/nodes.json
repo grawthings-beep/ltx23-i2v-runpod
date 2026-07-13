@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "comfyui": {
+    "repository": "https://github.com/Comfy-Org/ComfyUI.git",
+    "ref": "v0.17.2",
+    "expected_version": "0.17.2"
+  },
+  "nodes": [
+    {
+      "id": "comfyui-kjnodes",
+      "repository": "https://github.com/kijai/ComfyUI-KJNodes.git",
+      "ref": "2acdef1766026ff3be00daf3c45f6a064db9100f",
+      "directory": "ComfyUI-KJNodes",
+      "aliases": [
+        "comfyui-kjnodes"
+      ],
+      "provides": [
+        "LTXVChunkFeedForward",
+        "LTX2SamplingPreviewOverride",
+        "VRAM_Debug"
+      ]
+    },
+    {
+      "id": "comfyui-videohelpersuite",
+      "repository": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git",
+      "ref": "993082e4f2473bf4acaf06f51e33877a7eb38960",
+      "directory": "ComfyUI-VideoHelperSuite",
+      "aliases": [
+        "comfyui-videohelpersuite"
+      ],
+      "provides": [
+        "VHS_VideoCombine",
+        "VHS_VideoInfo",
+        "VHS_BatchManager",
+        "VHS_LoadVideo"
+      ]
+    },
+    {
+      "id": "comfyui-mxtoolkit",
+      "repository": "https://github.com/Smirnov75/ComfyUI-mxToolkit.git",
+      "ref": "7f7a0e584f12078a1c589645d866ae96bad0cc35",
+      "directory": "ComfyUI-mxToolkit",
+      "aliases": [
+        "comfyui-mxtoolkit",
+        "Smirnov75/ComfyUI-mxToolkit"
+      ],
+      "expected_version": "0.9.92",
+      "provides": [
+        "mxSlider"
+      ]
+    },
+    {
+      "id": "rgthree-comfy",
+      "repository": "https://github.com/rgthree/rgthree-comfy.git",
+      "ref": "27b4f4cdcf3b127c29d5d8135ac1536ecbd4c383",
+      "directory": "rgthree-comfy",
+      "aliases": [
+        "rgthree-comfy"
+      ],
+      "provides": [
+        "Power Lora Loader (rgthree)",
+        "Seed (rgthree)",
+        "Fast Groups Bypasser (rgthree)"
+      ]
+    },
+    {
+      "id": "comfyui-easy-use",
+      "repository": "https://github.com/yolain/ComfyUI-Easy-Use.git",
+      "ref": "d60b61d5759b020eff3356b3d395a1adb5456869",
+      "directory": "ComfyUI-Easy-Use",
+      "aliases": [
+        "comfyui-easy-use"
+      ],
+      "provides": [
+        "easy setNode",
+        "easy getNode",
+        "easy float",
+        "easy int"
+      ]
+    },
+    {
+      "id": "comfyui-vfi",
+      "repository": "https://github.com/GACLove/ComfyUI-VFI.git",
+      "ref": "6176a430f12cd16003f4664c1e3c6af8e96cc3c6",
+      "directory": "ComfyUI-VFI",
+      "aliases": [
+        "GACLove/ComfyUI-VFI"
+      ],
+      "provides": [
+        "RIFEInterpolation"
+      ]
+    },
+    {
+      "id": "comfyui-memory-cleanup",
+      "repository": "https://github.com/LAOGOU-666/Comfyui-Memory_Cleanup.git",
+      "ref": "58de13a6090e04408e343501ff8902c034d9f518",
+      "directory": "Comfyui-Memory_Cleanup",
+      "aliases": [
+        "comfyui_memory_cleanup"
+      ],
+      "expected_version": "1.1.3",
+      "provides": [
+        "RAMCleanup",
+        "VRAMCleanup"
+      ]
+    },
+    {
+      "id": "comfyui-impact-pack",
+      "repository": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git",
+      "ref": "429d0159ad429e64d2b3916e6e7be9c22d025c3c",
+      "directory": "ComfyUI-Impact-Pack",
+      "aliases": [
+        "comfyui-impact-pack"
+      ],
+      "provides": [
+        "ImpactDummyInput"
+      ]
+    },
+    {
+      "id": "comfyui-nvidia-rtx-nodes",
+      "repository": "https://github.com/Comfy-Org/Nvidia_RTX_Nodes_ComfyUI.git",
+      "ref": "f13f030c3173aeaa9aeb092177716b4300038814",
+      "directory": "Nvidia_RTX_Nodes_ComfyUI",
+      "aliases": [
+        "comfyui_nvidia_rtx_nodes"
+      ],
+      "expected_version": "0.1.2",
+      "provides": [
+        "RTXVideoSuperResolution"
+      ]
+    },
+    {
+      "id": "controlaltai-nodes",
+      "repository": "https://github.com/gseth/ControlAltAI-Nodes.git",
+      "ref": "721492b66c9cede8ae23ae10615462ad80cfd061",
+      "directory": "ControlAltAI-Nodes",
+      "aliases": [
+        "controlaltai-nodes"
+      ],
+      "provides": [
+        "TwoWaySwitch"
+      ]
+    },
+    {
+      "id": "comfyui-custom-scripts",
+      "repository": "https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git",
+      "ref": "609f3afaa74b2f88ef9ce8d939626065e3247469",
+      "directory": "ComfyUI-Custom-Scripts",
+      "aliases": [
+        "comfyui-custom-scripts"
+      ],
+      "expected_version": "1.2.5",
+      "provides": [
+        "MathExpression|pysssss"
+      ]
+    },
+    {
+      "id": "comfyui-int-and-float",
+      "repository": "https://github.com/danTheMonk/comfyui-int-and-float.git",
+      "ref": "a8b5a383ec6b5cff43c2f81a9a3aa24b87c4c720",
+      "directory": "comfyui-int-and-float",
+      "aliases": [
+        "danTheMonk/comfyui-int-and-float"
+      ],
+      "provides": [
+        "IntToFloat"
+      ]
+    },
+    {
+      "id": "comfyui-ltxvideo",
+      "repository": "https://github.com/Lightricks/ComfyUI-LTXVideo.git",
+      "ref": "531512f7286963dc7aff1fd8bf5556e95eae03af",
+      "directory": "ComfyUI-LTXVideo",
+      "aliases": [
+        "ComfyUI-LTXVideo"
+      ],
+      "provides": [
+        "LTXVSpatioTemporalTiledVAEDecode"
+      ]
+    }
+  ]
+}

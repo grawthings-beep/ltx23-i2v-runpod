@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "profiles": {
-    "public": "Only models whose download URLs are known from the workflow or upstream node.",
-    "workflow": "Every model enabled in the supplied workflow. Requires private LoRA URL variables.",
-    "all": "Every model referenced by the workflow, including currently disabled LoRAs and RIFE."
+    "public": "Core checkpoint, encoder, upscaler, preview VAE and distilled LoRA.",
+    "workflow": "Every model enabled in the supplied workflow, with pinned download URLs.",
+    "all": "Every model referenced by the workflow, including disabled LoRAs that still require optional URL variables, plus RIFE."
   },
   "models": [
     {
@@ -80,12 +80,15 @@
       "id": "dreamlay-lora",
       "filename": "DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
       "relative_path": "models/loras/LTX2/DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
-      "url_env": "MODEL_URL_DR34ML4Y",
-      "source": "private",
+      "url": "https://civitai.com/api/download/models/2747549",
+      "source": "civitai",
       "profiles": [
         "workflow",
         "all"
       ],
+      "auth": "CIVITAI_TOKEN",
+      "sha256": "4d10ca6d8beb12c53bc1a6dc8c266d5d228ef48fafd9de35620e6f2944c811bd",
+      "notes": "Civitai model version 2747549.",
       "min_bytes": 1000000
     },
     {
@@ -114,12 +117,15 @@
       "id": "creampie-animation-lora",
       "filename": "cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
       "relative_path": "models/loras/LTX2/cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
-      "url_env": "MODEL_URL_CREAMPIE",
-      "source": "private",
+      "url": "https://civitai.com/api/download/models/2699843",
+      "source": "civitai",
       "profiles": [
         "workflow",
         "all"
       ],
+      "auth": "CIVITAI_TOKEN",
+      "sha256": "f17dd867e12e2c8c872c0ad15a3f99a55d92f9d53dd18d0964764280d180eada",
+      "notes": "Civitai model version 2699843.",
       "min_bytes": 1000000
     },
     {
@@ -148,36 +154,45 @@
       "id": "penis-lora",
       "filename": "Penis Lora - LTX 2.3.safetensors",
       "relative_path": "models/loras/LTX 2.3/Penis Lora - LTX 2.3.safetensors",
-      "url_env": "MODEL_URL_PENIS_LORA",
-      "source": "private",
+      "url": "https://huggingface.co/Sentinel7/ltxv/resolve/main/2322988/2755189/plora_2.3_V6-step00016500.comfy.safetensors?download=true",
+      "source": "huggingface",
       "profiles": [
         "workflow",
         "all"
       ],
+      "auth": "HF_TOKEN",
+      "sha256": "6d8e44773d12d9a96a6f49b041a93bcfc4e5bfa28479f0f9c88bbf59b5636389",
+      "notes": "Exact mirror of Civitai model 2322988 version 2755189; saved under the workflow filename.",
       "min_bytes": 1000000
     },
     {
       "id": "deepthroat-lora",
       "filename": "ltxdeepthroat_v01.safetensors",
       "relative_path": "models/loras/LTX 2.3/ltxdeepthroat_v01.safetensors",
-      "url_env": "MODEL_URL_DEEPTHROAT",
-      "source": "private",
+      "url": "https://civitai.com/api/download/models/2784573",
+      "source": "civitai",
       "profiles": [
         "workflow",
         "all"
       ],
+      "auth": "CIVITAI_TOKEN",
+      "sha256": "99ef82279896f09973f841c554d2fec058f382df5e02680de41c30061cbbad07",
+      "notes": "Civitai model version 2784573.",
       "min_bytes": 1000000
     },
     {
       "id": "liquid-wet-lora",
       "filename": "liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
       "relative_path": "models/loras/LTX 2.3/liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
-      "url_env": "MODEL_URL_LIQUID_WET",
-      "source": "private",
+      "url": "https://civitai.com/api/download/models/2644206",
+      "source": "civitai",
       "profiles": [
         "workflow",
         "all"
       ],
+      "auth": "CIVITAI_TOKEN",
+      "sha256": "bedc1b34d7687f29b0a65c10ecb51c1735a9619adcc23e97523de4b3fbf9ab44",
+      "notes": "Civitai model version 2644206.",
       "min_bytes": 1000000
     },
     {

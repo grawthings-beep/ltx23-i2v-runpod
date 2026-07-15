@@ -39,27 +39,13 @@ network volume.
     └── validate.yml
 ```
 
-## Important: five enabled LoRA URLs are not contained in the workflow
+## Model download sources
 
-The workflow records their exact filenames but not their original download pages.
-The repository never guesses or substitutes models. Before using the default
-`MODEL_PROFILE=workflow`, provide direct file/API-download URLs for:
+Every model enabled by the default `MODEL_PROFILE=workflow` has a pinned download
+URL and SHA-256 where available. RunPod only needs `HF_TOKEN` and `CIVITAI_TOKEN`;
+the downloader applies them to the matching hosts without placing tokens in URLs.
 
-```text
-MODEL_URL_DR34ML4Y
-MODEL_URL_CREAMPIE
-MODEL_URL_PENIS_LORA
-MODEL_URL_DEEPTHROAT
-MODEL_URL_LIQUID_WET
-```
-
-For Civitai, use a URL in this form:
-
-```text
-https://civitai.com/api/download/models/<MODEL_VERSION_ID>
-```
-
-When `MODEL_PROFILE=all`, also provide:
+The disabled LoRAs included only by `MODEL_PROFILE=all` still require:
 
 ```text
 MODEL_URL_LTX23_NSFW_FURRY
@@ -68,9 +54,8 @@ MODEL_URL_TITFUCK
 MODEL_URL_ORGASM
 ```
 
-Startup fails clearly when a required URL is absent. To inspect ComfyUI without the
-private LoRAs, set `MODEL_PROFILE=public` or explicitly set
-`ALLOW_MISSING_MODEL_URLS=1`.
+With `MODEL_PROFILE=all`, startup fails clearly when one of those optional URLs is
+absent. To inspect ComfyUI without concept LoRAs, use `MODEL_PROFILE=public`.
 
 ## GitHub → GHCR
 
@@ -111,8 +96,6 @@ Create RunPod secrets and reference them in template environment variables:
 ```text
 HF_TOKEN={{ RUNPOD_SECRET_huggingface_token }}
 CIVITAI_TOKEN={{ RUNPOD_SECRET_civitai_token }}
-MODEL_URL_DR34ML4Y={{ RUNPOD_SECRET_model_url_dr34ml4y }}
-...
 ```
 
 Do not put tokens into `.env`, Docker build arguments, GitHub files or the image.

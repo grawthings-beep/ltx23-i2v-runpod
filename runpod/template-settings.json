@@ -22,12 +22,7 @@
   },
   "secret_references": {
     "HF_TOKEN": "{{ RUNPOD_SECRET_huggingface_token }}",
-    "CIVITAI_TOKEN": "{{ RUNPOD_SECRET_civitai_token }}",
-    "MODEL_URL_DR34ML4Y": "{{ RUNPOD_SECRET_model_url_dr34ml4y }}",
-    "MODEL_URL_CREAMPIE": "{{ RUNPOD_SECRET_model_url_creampie }}",
-    "MODEL_URL_PENIS_LORA": "{{ RUNPOD_SECRET_model_url_penis_lora }}",
-    "MODEL_URL_DEEPTHROAT": "{{ RUNPOD_SECRET_model_url_deepthroat }}",
-    "MODEL_URL_LIQUID_WET": "{{ RUNPOD_SECRET_model_url_liquid_wet }}"
+    "CIVITAI_TOKEN": "{{ RUNPOD_SECRET_civitai_token }}"
   },
   "gpu_guidance": {
     "recommended": "48 GB VRAM or more",

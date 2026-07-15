@@ -13,16 +13,17 @@ Use `template-settings.json` as the source of truth when creating a custom Pod t
 | HTTP port | `8188` |
 | Container start command | Leave empty; the image has its own `CMD` |
 
-Create RunPod secrets for the token and private model URL values, then reference them with
-`{{ RUNPOD_SECRET_secret_name }}`. Do not paste tokens into the repository or Docker image.
+Create RunPod secrets for `HF_TOKEN` and `CIVITAI_TOKEN`, then reference them with
+`{{ RUNPOD_SECRET_secret_name }}`. The default workflow profile needs no model URL variables.
+Do not paste tokens into the repository or Docker image.
 
 The image intentionally runs ComfyUI only. Jupyter and SSH daemons are not started, which reduces
 startup work and attack surface. RunPod's web terminal remains the normal recovery path.
 
 ## Profiles
 
-- `public`: downloads the five URLs embedded in the workflow plus no private LoRAs.
-- `workflow`: downloads every model currently enabled in the workflow. This is the default.
-- `all`: downloads all referenced LoRAs and the RIFE interpolation model.
+- `public`: downloads the core checkpoint, encoder, upscaler, preview VAE and distilled LoRA.
+- `workflow`: adds every concept LoRA currently enabled in the workflow from pinned URLs. This is the default.
+- `all`: downloads all referenced LoRAs and RIFE; disabled optional LoRAs still need their URL variables.
 
-A missing required private URL stops startup instead of launching a silently broken workflow.
+A missing optional URL under `MODEL_PROFILE=all` stops startup instead of launching a silently broken workflow.

@@ -13,8 +13,15 @@ Use `template-settings.json` as the source of truth when creating a custom Pod t
 | HTTP port | `8188` |
 | Container start command | Leave empty; the image has its own `CMD` |
 
-Create RunPod secrets for `HF_TOKEN` and `CIVITAI_TOKEN`, then reference them with
-`{{ RUNPOD_SECRET_secret_name }}`. The default workflow profile needs no model URL variables.
+Create RunPod secrets named exactly `HF_TOKEN` and `CIVITAI_TOKEN`. In the template
+environment-variable editor, use the key icon to map them as follows:
+
+```text
+HF_TOKEN={{ RUNPOD_SECRET_HF_TOKEN }}
+CIVITAI_TOKEN={{ RUNPOD_SECRET_CIVITAI_TOKEN }}
+```
+
+The default workflow profile needs no model URL variables.
 Do not paste tokens into the repository or Docker image.
 
 The image intentionally runs ComfyUI only. Jupyter and SSH daemons are not started, which reduces

@@ -43,7 +43,7 @@ network volume.
 
 Every model enabled by the default `MODEL_PROFILE=workflow` has a pinned download
 URL and SHA-256 where available. RunPod only needs `HF_TOKEN` and `CIVITAI_TOKEN`;
-the downloader applies them to the matching hosts without placing tokens in URLs.
+the downloader applies them only at runtime and redacts credentials from error logs.
 
 The disabled LoRAs included only by `MODEL_PROFILE=all` still require:
 
@@ -94,9 +94,12 @@ Recommended baseline:
 Create RunPod secrets and reference them in template environment variables:
 
 ```text
-HF_TOKEN={{ RUNPOD_SECRET_huggingface_token }}
-CIVITAI_TOKEN={{ RUNPOD_SECRET_civitai_token }}
+HF_TOKEN={{ RUNPOD_SECRET_HF_TOKEN }}
+CIVITAI_TOKEN={{ RUNPOD_SECRET_CIVITAI_TOKEN }}
 ```
+
+Create the RunPod secrets with those exact names, then use the key icon in the
+template environment-variable editor to select each secret.
 
 Do not put tokens into `.env`, Docker build arguments, GitHub files or the image.
 

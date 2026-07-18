@@ -8,12 +8,19 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import urllib.parse
 import zipfile
+
+
+CIVITAI_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+)
 
 
 def selected_models(manifest: dict, profile: str) -> list[dict]:
@@ -44,6 +51,11 @@ def add_auth(url: str, model: dict) -> tuple[str, list[str]]:
             auth_name = "HF_TOKEN"
 
     token = os.environ.get(auth_name, "").strip() if auth_name else ""
+    if host == "civitai.com" or host.endswith(".civitai.com"):
+        # Civitai redirects downloads to Backblaze B2/Cloudflare, which rejects
+        # aria2's default User-Agent for some files with HTTP 403.
+        headers.append(f"User-Agent: {CIVITAI_USER_AGENT}")
+
     if token and (host == "civitai.com" or host.endswith(".civitai.com")):
         query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
         if not any(key == "token" for key, _ in query):
@@ -55,6 +67,34 @@ def add_auth(url: str, model: dict) -> tuple[str, list[str]]:
         headers.append(f"Authorization: Bearer {token}")
 
     return url, headers
+
+
+def redact_sensitive_output(output: str) -> str:
+    """Remove credentials and signed-URL authorization values from logs."""
+    redacted = output
+    for env_name in ("CIVITAI_TOKEN", "HF_TOKEN"):
+        token = os.environ.get(env_name, "").strip()
+        if token:
+            redacted = redacted.replace(token, "<redacted>")
+
+    redacted = re.sub(
+        r"(?i)([?&](?:token|authorization)=)[^&\s]+",
+        r"\1<redacted>",
+        redacted,
+    )
+    redacted = re.sub(
+        r"(?i)(authorization:\s*(?:bearer\s+)?)[^\s]+",
+        r"\1<redacted>",
+        redacted,
+    )
+    return redacted
+
+
+def emit_sanitized(output: str, *, stream: object) -> None:
+    if not output:
+        return
+    sanitized = redact_sensitive_output(output)
+    print(sanitized, end="" if sanitized.endswith("\n") else "\n", file=stream)
 
 
 def is_complete(path: Path) -> bool:
@@ -151,7 +191,11 @@ def run_aria2(items: list[tuple[str, Path, list[str]]]) -> None:
             "--summary-interval=0",
         ]
         print("+ " + " ".join(str(x) for x in cmd), flush=True)
-        subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        emit_sanitized(result.stdout, stream=sys.stdout)
+        emit_sanitized(result.stderr, stream=sys.stderr)
+        if result.returncode:
+            raise subprocess.CalledProcessError(result.returncode, cmd)
     finally:
         input_path.unlink(missing_ok=True)
 

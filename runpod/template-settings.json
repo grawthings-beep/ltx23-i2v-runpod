@@ -21,8 +21,8 @@
     "NODE_CLONE_CONCURRENCY": "6"
   },
   "secret_references": {
-    "HF_TOKEN": "{{ RUNPOD_SECRET_huggingface_token }}",
-    "CIVITAI_TOKEN": "{{ RUNPOD_SECRET_civitai_token }}"
+    "HF_TOKEN": "{{ RUNPOD_SECRET_HF_TOKEN }}",
+    "CIVITAI_TOKEN": "{{ RUNPOD_SECRET_CIVITAI_TOKEN }}"
   },
   "gpu_guidance": {
     "recommended": "48 GB VRAM or more",

@@ -181,8 +181,13 @@ docker compose up
 
 Open `http://localhost:8188`.
 
-The first start downloads the selected model profile. To build and inspect the UI
-without downloading models:
+The first start downloads the selected model profile. The default `workflow`
+profile is currently about 43 GiB. ComfyUI intentionally starts only after every
+selected file has downloaded and passed the doctor checks, so the RunPod HTTP
+proxy can return 404 during this bootstrap phase. Follow the Pod logs for live
+aria2 progress. Later starts skip completed files stored under `/workspace`.
+
+To build and inspect the UI without downloading models:
 
 ```bash
 SKIP_MODEL_DOWNLOAD=1 docker compose up

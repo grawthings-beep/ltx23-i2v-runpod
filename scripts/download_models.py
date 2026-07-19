@@ -187,15 +187,26 @@ def run_aria2(items: list[tuple[str, Path, list[str]]]) -> None:
             "--connect-timeout=20",
             "--timeout=60",
             "--check-certificate=true",
-            "--console-log-level=warn",
-            "--summary-interval=0",
+            "--console-log-level=notice",
+            "--summary-interval=10",
         ]
         print("+ " + " ".join(str(x) for x in cmd), flush=True)
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
-        emit_sanitized(result.stdout, stream=sys.stdout)
-        emit_sanitized(result.stderr, stream=sys.stderr)
-        if result.returncode:
-            raise subprocess.CalledProcessError(result.returncode, cmd)
+        # Keep progress visible during large first-run downloads while still
+        # redacting credentials and signed-URL parameters before they reach logs.
+        with subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        ) as process:
+            if process.stdout is None:
+                raise RuntimeError("failed to capture aria2c output")
+            for line in process.stdout:
+                emit_sanitized(line, stream=sys.stdout)
+            returncode = process.wait()
+        if returncode:
+            raise subprocess.CalledProcessError(returncode, cmd)
     finally:
         input_path.unlink(missing_ok=True)
 
@@ -288,6 +299,10 @@ def main() -> int:
         for item in missing:
             print(f"[warn] skipping missing URL: {item}", file=sys.stderr)
 
+    if downloads:
+        print(f"[download] {len(downloads)} file(s) are not yet complete:", flush=True)
+        for _, destination, _ in downloads:
+            print(f"  - {destination}", flush=True)
     run_aria2(downloads)
 
     for model, archive_path, destination in archives:

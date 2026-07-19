@@ -75,5 +75,5 @@ EXPOSE 8188
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30m --retries=5 \
   CMD curl -fsS "http://127.0.0.1:${COMFY_PORT:-8188}/system_stats" >/dev/null || exit 1
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "-s", "--"]
 CMD ["/opt/bootstrap/scripts/start.sh"]

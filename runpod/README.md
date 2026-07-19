@@ -13,6 +13,11 @@ Use `template-settings.json` as the source of truth when creating a custom Pod t
 | HTTP port | `8188` |
 | Container start command | Leave empty; the image has its own `CMD` |
 
+The first `workflow` start downloads about 43 GiB before running the doctor and
+starting ComfyUI. Until that finishes, port 8188 has no listener and the RunPod
+proxy can return 404. Pod logs show live aria2 progress. Reuse the same network
+volume on later Pods so completed files under `/workspace` are skipped.
+
 Create RunPod secrets named exactly `HF_TOKEN` and `CIVITAI_TOKEN`. In the template
 environment-variable editor, use the key icon to map them as follows:
 

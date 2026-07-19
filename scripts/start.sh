@@ -66,6 +66,7 @@ if [[ "${SKIP_MODEL_DOWNLOAD:-0}" != "1" ]]; then
   exec 9>"${DATA_ROOT}/.bootstrap/models.lock"
   flock 9
   log "ensuring model profile '${MODEL_PROFILE}'"
+  log "ComfyUI will start after model download and doctor checks complete"
   python "${BOOTSTRAP_ROOT}/scripts/download_models.py" \
     --manifest "${BOOTSTRAP_ROOT}/manifest/models.json" \
     --data-root "${DATA_ROOT}" \

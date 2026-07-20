@@ -3,6 +3,7 @@
 validate:
 	python3 scripts/validate_repo.py
 	python3 -m compileall -q scripts
+	python3 -m unittest discover -s tests -v
 	bash -n scripts/start.sh
 
 build:

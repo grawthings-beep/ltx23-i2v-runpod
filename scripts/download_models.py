@@ -13,7 +13,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.parse
+import urllib.request
 import zipfile
 
 
@@ -21,6 +23,14 @@ CIVITAI_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 )
+CIVITAI_REDIRECT_STATUSES = {301, 302, 303, 307, 308}
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Expose redirect responses so signed download URLs can be captured."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001
+        return None
 
 
 def selected_models(manifest: dict, profile: str) -> list[dict]:
@@ -32,6 +42,65 @@ def resolved_url(model: dict) -> str | None:
         return model["url"]
     env_name = model.get("url_env")
     return os.environ.get(env_name, "").strip() or None
+
+
+def is_civitai_host(host: str) -> bool:
+    return host == "civitai.com" or host.endswith(".civitai.com")
+
+
+def is_civitai_download_api_host(host: str) -> bool:
+    return host in {"civitai.com", "www.civitai.com"}
+
+
+def resolve_civitai_download_url(url: str, token: str) -> str:
+    """Resolve Civitai's authenticated redirect before handing off to aria2.
+
+    aria2 does not reliably preserve RFC 9110 authentication semantics across
+    Civitai's redirects. Resolve redirects while they remain on Civitai and
+    return the first external signed storage URL without downloading its body.
+    """
+    opener = urllib.request.build_opener(NoRedirectHandler())
+    current = url
+    for _ in range(10):
+        host = (urllib.parse.urlsplit(current).hostname or "").lower()
+        if not is_civitai_download_api_host(host):
+            return current
+
+        request = urllib.request.Request(
+            current,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "User-Agent": CIVITAI_USER_AGENT,
+            },
+            method="GET",
+        )
+        try:
+            response = opener.open(request, timeout=30)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in CIVITAI_REDIRECT_STATUSES:
+                raise RuntimeError(
+                    f"Civitai URL resolution failed with HTTP {exc.code}"
+                ) from exc
+            location = exc.headers.get("Location")
+            exc.close()
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"Civitai URL resolution failed: {exc.reason}") from exc
+        else:
+            with response:
+                location = response.headers.get("Location")
+                if not location:
+                    return current
+
+        if not location:
+            raise RuntimeError("Civitai redirect did not include a Location header")
+        next_url = urllib.parse.urljoin(current, location)
+        next_parts = urllib.parse.urlsplit(next_url)
+        next_host = (next_parts.hostname or "").lower()
+        if next_host == "auth.civitai.com" or next_parts.path.startswith("/login"):
+            raise RuntimeError("Civitai rejected CIVITAI_TOKEN")
+        current = next_url
+
+    raise RuntimeError("Civitai URL resolution exceeded 10 redirects")
 
 
 def add_auth(url: str, model: dict) -> tuple[str, list[str]]:
@@ -51,18 +120,16 @@ def add_auth(url: str, model: dict) -> tuple[str, list[str]]:
             auth_name = "HF_TOKEN"
 
     token = os.environ.get(auth_name, "").strip() if auth_name else ""
-    if host == "civitai.com" or host.endswith(".civitai.com"):
+    if is_civitai_host(host):
         # Civitai redirects downloads to Backblaze B2/Cloudflare, which rejects
         # aria2's default User-Agent for some files with HTTP 403.
         headers.append(f"User-Agent: {CIVITAI_USER_AGENT}")
 
-    if token and (host == "civitai.com" or host.endswith(".civitai.com")):
-        query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
-        if not any(key == "token" for key, _ in query):
-            query.append(("token", token))
-        url = urllib.parse.urlunsplit(
-            (parsed.scheme, parsed.netloc, parsed.path, urllib.parse.urlencode(query), parsed.fragment)
-        )
+    if token and is_civitai_download_api_host(host):
+        url = resolve_civitai_download_url(url, token)
+        resolved_host = (urllib.parse.urlsplit(url).hostname or "").lower()
+        if is_civitai_download_api_host(resolved_host):
+            headers.append(f"Authorization: Bearer {token}")
     elif token and (host == "huggingface.co" or host.endswith(".huggingface.co")):
         headers.append(f"Authorization: Bearer {token}")
 
@@ -78,7 +145,8 @@ def redact_sensitive_output(output: str) -> str:
             redacted = redacted.replace(token, "<redacted>")
 
     redacted = re.sub(
-        r"(?i)([?&](?:token|authorization)=)[^&\s]+",
+        r"(?i)([?&](?:token|authorization|x-amz-credential|x-amz-signature|"
+        r"x-amz-security-token|policy|signature|key-pair-id)=)[^&\s]+",
         r"\1<redacted>",
         redacted,
     )

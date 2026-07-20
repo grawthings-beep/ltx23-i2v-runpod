@@ -66,7 +66,7 @@
       "id": "ltx-distilled-lora",
       "filename": "ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors",
       "relative_path": "models/loras/LTX2/ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors",
-      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/main/loras/ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors?download=true",
+      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/loras/ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors?download=true",
       "source": "huggingface",
       "profiles": [
         "public",
@@ -74,21 +74,22 @@
         "all"
       ],
       "auth": "HF_TOKEN",
+      "sha256": "289441f530ca30520bd5e1d4f34b8437f75d6c66f9b40e32b3824e225dd96325",
       "min_bytes": 1000000
     },
     {
       "id": "dreamlay-lora",
       "filename": "DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
       "relative_path": "models/loras/LTX2/DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
-      "url": "https://civitai.com/api/download/models/2747549",
-      "source": "civitai",
+      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/888f2b1b0556673f6c4cb685294c9130e3ac2e0f/DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors?download=true",
+      "source": "huggingface",
       "profiles": [
         "workflow",
         "all"
       ],
-      "auth": "CIVITAI_TOKEN",
+      "auth": "HF_TOKEN",
       "sha256": "4d10ca6d8beb12c53bc1a6dc8c266d5d228ef48fafd9de35620e6f2944c811bd",
-      "notes": "Civitai model version 2747549.",
+      "notes": "Exact Hugging Face mirror of Civitai model version 2747549; repository commit pinned.",
       "min_bytes": 1000000
     },
     {
@@ -117,15 +118,15 @@
       "id": "creampie-animation-lora",
       "filename": "cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
       "relative_path": "models/loras/LTX2/cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
-      "url": "https://civitai.com/api/download/models/2699843",
-      "source": "civitai",
+      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/34dfd325ba88e35dadbe09b3b0fb7b81996c22d6/cr3ampi3_animation_i2v_ltx2_v1.0.safetensors?download=true",
+      "source": "huggingface",
       "profiles": [
         "workflow",
         "all"
       ],
-      "auth": "CIVITAI_TOKEN",
+      "auth": "HF_TOKEN",
       "sha256": "f17dd867e12e2c8c872c0ad15a3f99a55d92f9d53dd18d0964764280d180eada",
-      "notes": "Civitai model version 2699843.",
+      "notes": "Exact Hugging Face mirror of Civitai model version 2699843; repository commit pinned.",
       "min_bytes": 1000000
     },
     {
@@ -169,30 +170,30 @@
       "id": "deepthroat-lora",
       "filename": "ltxdeepthroat_v01.safetensors",
       "relative_path": "models/loras/LTX 2.3/ltxdeepthroat_v01.safetensors",
-      "url": "https://civitai.com/api/download/models/2784573",
-      "source": "civitai",
+      "url": "https://huggingface.co/nnndite/ltx2.3DeepThroat2.0/resolve/91ee9c55bee2e177b42dc53105c993b052b8118c/ltx2.3_deepthroat_v01.safetensors?download=true",
+      "source": "huggingface",
       "profiles": [
         "workflow",
         "all"
       ],
-      "auth": "CIVITAI_TOKEN",
+      "auth": "HF_TOKEN",
       "sha256": "99ef82279896f09973f841c554d2fec058f382df5e02680de41c30061cbbad07",
-      "notes": "Civitai model version 2784573.",
+      "notes": "Exact Hugging Face mirror of Civitai model version 2784573; saved under the workflow filename.",
       "min_bytes": 1000000
     },
     {
       "id": "liquid-wet-lora",
       "filename": "liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
       "relative_path": "models/loras/LTX 2.3/liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
-      "url": "https://civitai.com/api/download/models/2644206",
-      "source": "civitai",
+      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/34dfd325ba88e35dadbe09b3b0fb7b81996c22d6/liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors?download=true",
+      "source": "huggingface",
       "profiles": [
         "workflow",
         "all"
       ],
-      "auth": "CIVITAI_TOKEN",
+      "auth": "HF_TOKEN",
       "sha256": "bedc1b34d7687f29b0a65c10ecb51c1735a9619adcc23e97523de4b3fbf9ab44",
-      "notes": "Civitai model version 2644206.",
+      "notes": "Exact Hugging Face mirror of Civitai model version 2644206; repository commit pinned.",
       "min_bytes": 1000000
     },
     {

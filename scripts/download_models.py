@@ -179,6 +179,12 @@ def validate_model_file(model: dict, path: Path) -> None:
     if size < minimum:
         raise RuntimeError(f"file too small: {path} ({size} bytes; expected at least {minimum})")
 
+    exact = model.get("exact_bytes")
+    if exact is not None and size != int(exact):
+        raise RuntimeError(
+            f"wrong file size: {path} ({size} bytes; expected exactly {int(exact)})"
+        )
+
     if path.suffix.lower() == ".safetensors":
         with path.open("rb") as handle:
             raw_length = handle.read(8)

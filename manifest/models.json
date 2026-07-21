@@ -1,213 +1,192 @@
 {
   "schema_version": 1,
   "profiles": {
-    "public": "Core checkpoint, encoder, upscaler, preview VAE and distilled LoRA.",
-    "workflow": "Every model enabled in the supplied workflow, with pinned download URLs.",
-    "all": "Every model referenced by the workflow, including disabled LoRAs that still require optional URL variables, plus RIFE."
+    "public": "Core models enabled by the MrXin LTX 2.3 I2V EROS V6.1 workflow.",
+    "workflow": "Enabled V6.1 models plus its three optional concept LoRAs; disabled alternate loaders are excluded.",
+    "all": "Every model referenced by V6.1, including disabled alternate loaders and RIFE."
   },
   "models": [
     {
-      "id": "ltx2310eros-checkpoint",
-      "filename": "ltx2310eros_beta.safetensors",
-      "relative_path": "models/checkpoints/ltx2310eros_beta.safetensors",
-      "url": "https://civitai.com/api/download/models/2752410",
-      "source": "civitai",
-      "profiles": [
-        "public",
-        "workflow",
-        "all"
-      ],
-      "auth": "CIVITAI_TOKEN",
-      "notes": "Model version 2752410 from the checkpoint link embedded in the workflow.",
-      "min_bytes": 1000000000
+      "id": "ltx2310eros-v1-fp8",
+      "filename": "ltx2310eros_v1_FP8.safetensors",
+      "relative_path": "models/diffusion_models/LTX 2.3/10Eros/ltx2310eros_v1_FP8.safetensors",
+      "url": "https://huggingface.co/TenStrip/LTX2.3-10Eros/resolve/e234fd6fadbfe9957f0e9277880882c4d11afb21/10Eros_v1-fp8mixed_learned.safetensors?download=true",
+      "source": "huggingface",
+      "profiles": ["public", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "5c00038d4f1527e9842a832eb35192990de410ed2dd722c70aaf0f23cb3c9fd6",
+      "exact_bytes": 29161842950,
+      "min_bytes": 29000000000,
+      "notes": "Exact FP8 file selected by the V6.1 Civitai link; saved under the filename required by the workflow."
+    },
+    {
+      "id": "ltx23-distilled-transformer-fp8-v3",
+      "filename": "ltx-2.3-22b-distilled_transformer_only_fp8_input_scaled_v3.safetensors",
+      "relative_path": "models/diffusion_models/LTX 2.3/ltx-2.3-22b-distilled_transformer_only_fp8_input_scaled_v3.safetensors",
+      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/diffusion_models/ltx-2.3-22b-distilled_transformer_only_fp8_input_scaled_v3.safetensors?download=true",
+      "source": "huggingface",
+      "profiles": ["all"],
+      "auth": "HF_TOKEN",
+      "sha256": "7327111e298066af8032f573d8db187986229ed2d4c926818ebf02041cfac8cf",
+      "exact_bytes": 25016398672,
+      "min_bytes": 25000000000
     },
     {
       "id": "gemma-text-encoder",
       "filename": "gemma_3_12B_it_fp8_e4m3fn.safetensors",
-      "relative_path": "models/text_encoders/gemma_3_12B_it_fp8_e4m3fn.safetensors",
-      "url": "https://huggingface.co/GitMylo/LTX-2-comfy_gemma_fp8_e4m3fn/resolve/main/gemma_3_12B_it_fp8_e4m3fn.safetensors?download=true",
+      "relative_path": "models/text_encoders/LTX 2.3/gemma_3_12B_it_fp8_e4m3fn.safetensors",
+      "url": "https://huggingface.co/GitMylo/LTX-2-comfy_gemma_fp8_e4m3fn/resolve/c26496d8fab07c9743fd09e24562e246ae009ed6/gemma_3_12B_it_fp8_e4m3fn.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "public",
-        "workflow",
-        "all"
-      ],
+      "profiles": ["public", "workflow", "all"],
       "auth": "HF_TOKEN",
-      "min_bytes": 1000000000
+      "sha256": "38c8ca98d01afc93a04f9fb18255755884b9eb52b7b40080076e9c892609751b",
+      "exact_bytes": 13210008986,
+      "min_bytes": 13000000000
     },
     {
-      "id": "ltx-spatial-upscaler",
-      "filename": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
-      "relative_path": "models/latent_upscale_models/ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
-      "url": "https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-spatial-upscaler-x2-1.1.safetensors?download=true",
+      "id": "ltx23-text-projection",
+      "filename": "ltx-2.3_text_projection_bf16.safetensors",
+      "relative_path": "models/clip/LTX 2.3/ltx-2.3_text_projection_bf16.safetensors",
+      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/text_encoders/ltx-2.3_text_projection_bf16.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "public",
-        "workflow",
-        "all"
-      ],
+      "profiles": ["public", "workflow", "all"],
       "auth": "HF_TOKEN",
-      "min_bytes": 50000000
+      "sha256": "911d59bb4cb7708179c9a0045ea0fe41212ecfb77aed3a02702b7c0a8274911f",
+      "exact_bytes": 2312149072,
+      "min_bytes": 2300000000
+    },
+    {
+      "id": "ltx23-video-vae",
+      "filename": "LTX23_video_vae_bf16.safetensors",
+      "relative_path": "models/vae/LTX 2.3/LTX23_video_vae_bf16.safetensors",
+      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/vae/LTX23_video_vae_bf16.safetensors?download=true",
+      "source": "huggingface",
+      "profiles": ["public", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "01ea62d09bc139f95c5dee7b5c062ad6a3e6cd8be910a1983ac02e7eb5b8ee3b",
+      "exact_bytes": 1452258578,
+      "min_bytes": 1400000000
+    },
+    {
+      "id": "ltx23-audio-vae",
+      "filename": "LTX23_audio_vae_bf16.safetensors",
+      "relative_path": "models/vae/LTX 2.3/LTX23_audio_vae_bf16.safetensors",
+      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/vae/LTX23_audio_vae_bf16.safetensors?download=true",
+      "source": "huggingface",
+      "profiles": ["public", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "5bc10fa4adecf99dda132d916e23048cbd56797702c5fa50eb5d2079048a38c3",
+      "exact_bytes": 364855188,
+      "min_bytes": 360000000
     },
     {
       "id": "tae-preview-vae",
       "filename": "taeltx2_3.safetensors",
-      "relative_path": "models/vae/taeltx2_3.safetensors",
-      "url": "https://github.com/madebyollin/taehv/raw/main/safetensors/taeltx2_3.safetensors",
+      "relative_path": "models/vae/LTX 2.3/taeltx2_3.safetensors",
+      "url": "https://raw.githubusercontent.com/madebyollin/taehv/093b918971d59001a0bad6dfd6e0409b5e1752cf/safetensors/taeltx2_3.safetensors",
       "source": "github",
-      "profiles": [
-        "public",
-        "workflow",
-        "all"
-      ],
-      "min_bytes": 100000
+      "profiles": ["public", "workflow", "all"],
+      "sha256": "f0773b4e3e57318e6aa4dd4a35e1d16213a5f160fbc0376163f06888bbcbe246",
+      "exact_bytes": 23531296,
+      "min_bytes": 23000000
     },
     {
-      "id": "ltx-distilled-lora",
-      "filename": "ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors",
-      "relative_path": "models/loras/LTX2/ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors",
-      "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/loras/ltx-2.3-22b-distilled-lora-dynamic_fro09_avg_rank_105_bf16.safetensors?download=true",
+      "id": "ltx23-spatial-upscaler-x2-v1",
+      "filename": "ltx-2.3-spatial-upscaler-x2-1.0.safetensors",
+      "relative_path": "models/latent_upscale_models/LTX 2.3/ltx-2.3-spatial-upscaler-x2-1.0.safetensors",
+      "url": "https://huggingface.co/Lightricks/LTX-2.3/resolve/4229404625088d21c4f112eb640fb04a0900ee25/ltx-2.3-spatial-upscaler-x2-1.0.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "public",
-        "workflow",
-        "all"
-      ],
+      "profiles": ["public", "workflow", "all"],
       "auth": "HF_TOKEN",
-      "sha256": "289441f530ca30520bd5e1d4f34b8437f75d6c66f9b40e32b3824e225dd96325",
-      "min_bytes": 1000000
+      "sha256": "93800de87dbc448b5b31f3c5c3a1579ba6335151de061a564f6f026b0fc770ad",
+      "exact_bytes": 995743504,
+      "min_bytes": 990000000,
+      "notes": "V6.1 loader value is x2-1.0; this intentionally follows the JSON rather than its stale x2-1.1 folder note."
     },
     {
-      "id": "dreamlay-lora",
-      "filename": "DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
-      "relative_path": "models/loras/LTX2/DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors",
-      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/888f2b1b0556673f6c4cb685294c9130e3ac2e0f/DR34ML4Y_LTXXX_PREVIEW_RC1.safetensors?download=true",
+      "id": "nmkd-siax-upscaler",
+      "filename": "nmkdSiaxCX_200k.safetensors",
+      "relative_path": "models/upscale_models/nmkdSiaxCX_200k.safetensors",
+      "url": "https://huggingface.co/panosgr/Upscaler/resolve/da73b47506b4e795e3d440f5ddbcb405a8728552/nmkdSiaxCX_200k.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "workflow",
-        "all"
-      ],
+      "profiles": ["all"],
       "auth": "HF_TOKEN",
-      "sha256": "4d10ca6d8beb12c53bc1a6dc8c266d5d228ef48fafd9de35620e6f2944c811bd",
-      "notes": "Exact Hugging Face mirror of Civitai model version 2747549; repository commit pinned.",
-      "min_bytes": 1000000
+      "sha256": "839a8ab4d8370a6697e6c07783439c4cea6c5295882745f2e7ddfbb555062286",
+      "exact_bytes": 66864028,
+      "min_bytes": 66000000
     },
     {
-      "id": "furry-lora",
-      "filename": "LTX2_3_NSFW_furry_concat_v2.safetensors",
-      "relative_path": "models/loras/LTX2/LTX2_3_NSFW_furry_concat_v2.safetensors",
-      "url_env": "MODEL_URL_LTX23_NSFW_FURRY",
-      "source": "private",
-      "profiles": [
-        "all"
-      ],
-      "min_bytes": 1000000
-    },
-    {
-      "id": "cum-shot-lora",
-      "filename": "LTX-2.3 - Cum Shot.safetensors",
-      "relative_path": "models/loras/LTX2/LTX-2.3 - Cum Shot.safetensors",
-      "url_env": "MODEL_URL_CUM_SHOT",
-      "source": "private",
-      "profiles": [
-        "all"
-      ],
-      "min_bytes": 1000000
-    },
-    {
-      "id": "creampie-animation-lora",
-      "filename": "cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
-      "relative_path": "models/loras/LTX2/cr3ampi3_animation_i2v_ltx2_v1.0.safetensors",
-      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/34dfd325ba88e35dadbe09b3b0fb7b81996c22d6/cr3ampi3_animation_i2v_ltx2_v1.0.safetensors?download=true",
+      "id": "ltx23-distilled-lora-first-pass",
+      "filename": "ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors",
+      "relative_path": "models/loras/LTX 2.3/10Eros/ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors",
+      "url": "https://huggingface.co/TenStrip/LTX2.3_Distilled_Lora_1.1_Experiments/resolve/9c3548954510182827d7bfc872fd7cceb64230fd/ltx-2.3-22b-distilled-lora-1.1_fro90_ceil72_condsafe.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "workflow",
-        "all"
-      ],
+      "profiles": ["public", "workflow", "all"],
       "auth": "HF_TOKEN",
-      "sha256": "f17dd867e12e2c8c872c0ad15a3f99a55d92f9d53dd18d0964764280d180eada",
-      "notes": "Exact Hugging Face mirror of Civitai model version 2699843; repository commit pinned.",
-      "min_bytes": 1000000
+      "sha256": "e970f64a2ce5469491fb1714a3fa72c8b606fa82affff0531e836dbc91d31f34",
+      "exact_bytes": 662072824,
+      "min_bytes": 660000000
     },
     {
-      "id": "titfuck-lora",
-      "filename": "LTX2.3TITFUCKE2000.safetensors",
-      "relative_path": "models/loras/LTX 2.3/LTX2.3TITFUCKE2000.safetensors",
-      "url_env": "MODEL_URL_TITFUCK",
-      "source": "private",
-      "profiles": [
-        "all"
-      ],
-      "min_bytes": 1000000
-    },
-    {
-      "id": "orgasm-lora",
-      "filename": "LTX-2.3 - Orgasm.safetensors",
-      "relative_path": "models/loras/LTX 2.3/LTX-2.3 - Orgasm.safetensors",
-      "url_env": "MODEL_URL_ORGASM",
-      "source": "private",
-      "profiles": [
-        "all"
-      ],
-      "min_bytes": 1000000
-    },
-    {
-      "id": "penis-lora",
-      "filename": "Penis Lora - LTX 2.3.safetensors",
-      "relative_path": "models/loras/LTX 2.3/Penis Lora - LTX 2.3.safetensors",
-      "url": "https://huggingface.co/Sentinel7/ltxv/resolve/main/2322988/2755189/plora_2.3_V6-step00016500.comfy.safetensors?download=true",
+      "id": "ltx23-distilled-lora-final-pass",
+      "filename": "ltx-2.3-22b-distilled-lora-384-1.1.safetensors",
+      "relative_path": "models/loras/LTX 2.3/Distilled/ltx-2.3-22b-distilled-lora-384-1.1.safetensors",
+      "url": "https://huggingface.co/Lightricks/LTX-2.3/resolve/4229404625088d21c4f112eb640fb04a0900ee25/ltx-2.3-22b-distilled-lora-384-1.1.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "workflow",
-        "all"
-      ],
+      "profiles": ["public", "workflow", "all"],
       "auth": "HF_TOKEN",
-      "sha256": "6d8e44773d12d9a96a6f49b041a93bcfc4e5bfa28479f0f9c88bbf59b5636389",
-      "notes": "Exact mirror of Civitai model 2322988 version 2755189; saved under the workflow filename.",
-      "min_bytes": 1000000
+      "sha256": "f5d4953f3386197a4b4f5abdb17616ff256171e8075c111d6e7d2dfa6e823b3a",
+      "exact_bytes": 7605507256,
+      "min_bytes": 7600000000
     },
     {
-      "id": "deepthroat-lora",
-      "filename": "ltxdeepthroat_v01.safetensors",
-      "relative_path": "models/loras/LTX 2.3/ltxdeepthroat_v01.safetensors",
-      "url": "https://huggingface.co/nnndite/ltx2.3DeepThroat2.0/resolve/91ee9c55bee2e177b42dc53105c993b052b8118c/ltx2.3_deepthroat_v01.safetensors?download=true",
+      "id": "dreamlay-v2-lora",
+      "filename": "DR34ML4Y_LTXXX_V2.safetensors",
+      "relative_path": "models/loras/LTX 2.3/DR34ML4Y_LTXXX_V2.safetensors",
+      "url": "https://huggingface.co/Sentinel7/ltxv/resolve/14792ea15ae6eb2b416d8a5b1e1d0e023ab12582/1811313/2950842/DR34ML4Y_LTXXX_V2.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "workflow",
-        "all"
-      ],
+      "profiles": ["workflow", "all"],
       "auth": "HF_TOKEN",
-      "sha256": "99ef82279896f09973f841c554d2fec058f382df5e02680de41c30061cbbad07",
-      "notes": "Exact Hugging Face mirror of Civitai model version 2784573; saved under the workflow filename.",
-      "min_bytes": 1000000
+      "sha256": "d91d2e783879601bc7a638c978f8257e5ed340c012e7d668b7cd32de443ff2e1",
+      "exact_bytes": 1940553800,
+      "min_bytes": 1900000000
     },
     {
-      "id": "liquid-wet-lora",
-      "filename": "liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
-      "relative_path": "models/loras/LTX 2.3/liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors",
-      "url": "https://huggingface.co/rahul7star/Ltx-2-3-Lora-Collection/resolve/34dfd325ba88e35dadbe09b3b0fb7b81996c22d6/liquid_wet_dr1pp_ltx2_v1.0_scaled.safetensors?download=true",
+      "id": "penile-praxis-v4-lora",
+      "filename": "Penile_Praxis_V4.safetensors",
+      "relative_path": "models/loras/LTX 2.3/Reco/Penile_Praxis_V4.safetensors",
+      "url": "https://huggingface.co/Sentinel7/ltxv/resolve/14792ea15ae6eb2b416d8a5b1e1d0e023ab12582/2332473/2772932/Penile_Praxis_V4.safetensors?download=true",
       "source": "huggingface",
-      "profiles": [
-        "workflow",
-        "all"
-      ],
+      "profiles": ["workflow", "all"],
       "auth": "HF_TOKEN",
-      "sha256": "bedc1b34d7687f29b0a65c10ecb51c1735a9619adcc23e97523de4b3fbf9ab44",
-      "notes": "Exact Hugging Face mirror of Civitai model version 2644206; repository commit pinned.",
-      "min_bytes": 1000000
+      "sha256": "9e301d35a97dc8188a2287290e08283c7bccd29bc4deaf0f37f65ce98fc9a789",
+      "exact_bytes": 1308756384,
+      "min_bytes": 1300000000
+    },
+    {
+      "id": "ltx23-physics-v2-lora",
+      "filename": "LTX2.3_Physics_V2_000002000.safetensors",
+      "relative_path": "models/loras/LTX 2.3/LTX2.3_Physics_V2_000002000.safetensors",
+      "url": "https://huggingface.co/Sentinel7/ltxv/resolve/14792ea15ae6eb2b416d8a5b1e1d0e023ab12582/2592090/2952846/LTX2.3_Physics_V2_000002000.safetensors?download=true",
+      "source": "huggingface",
+      "profiles": ["workflow", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "c9dcde33448ec5ce9c1286806a27772c6275e2a7f6e4e7491f83cadcbab82c1d",
+      "exact_bytes": 1348027408,
+      "min_bytes": 1300000000
     },
     {
       "id": "rife-flownet",
       "filename": "flownet.pkl",
       "relative_path": "models/rife/flownet.pkl",
-      "archive_url": "https://huggingface.co/hzwer/RIFE/resolve/main/RIFEv4.26_0921.zip",
+      "archive_url": "https://huggingface.co/hzwer/RIFE/resolve/01fdc7e97404120c243c3ea7b427046e5dc7643e/RIFEv4.26_0921.zip?download=true",
       "archive_member_basename": "flownet.pkl",
       "source": "huggingface",
-      "profiles": [
-        "all"
-      ],
+      "profiles": ["all"],
       "auth": "HF_TOKEN",
-      "min_bytes": 1000000
+      "sha256": "45c7f74156704769dc9f85cfcaf8552e1e926f9399dcfa3a553dee88fac6f53f",
+      "exact_bytes": 24636301,
+      "min_bytes": 24000000
     }
   ]
 }

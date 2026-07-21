@@ -81,6 +81,7 @@ doctor_args=(
   --data-root "${DATA_ROOT}"
   --comfy-root "${COMFYUI_ROOT}"
   --profile "${MODEL_PROFILE}"
+  --workflow "${DATA_ROOT}/user/default/workflows/MrXin LTX 2.3 I2V EROS V6.1.json"
 )
 if [[ "${SKIP_MODEL_DOWNLOAD:-0}" == "1" ]]; then
   doctor_args+=(--skip-models)

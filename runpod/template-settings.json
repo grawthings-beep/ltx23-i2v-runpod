@@ -1,5 +1,5 @@
 {
-  "name": "ltx23-i2v-comfyui",
+  "name": "ltx23-i2v-eros-v61",
   "container_image": "ghcr.io/grawthings-beep/ltx23-i2v-runpod:latest",
   "container_disk_gb": 35,
   "volume_mount_path": "/workspace",
@@ -15,17 +15,17 @@
     "DOWNLOAD_CONCURRENCY": "5",
     "DOWNLOAD_CONNECTIONS": "16",
     "ALLOW_MISSING_MODEL_URLS": "0",
+    "SKIP_MODEL_DOWNLOAD": "0",
     "COMFY_PORT": "8188",
     "COMFY_ARGS": "",
     "DOWNLOAD_MAX_TRIES": "10",
     "NODE_CLONE_CONCURRENCY": "6"
   },
   "secret_references": {
-    "HF_TOKEN": "{{ RUNPOD_SECRET_HF_TOKEN }}",
-    "CIVITAI_TOKEN": "{{ RUNPOD_SECRET_CIVITAI_TOKEN }}"
+    "HF_TOKEN": "{{ RUNPOD_SECRET_HF_TOKEN }}"
   },
   "gpu_guidance": {
-    "recommended": "48 GB VRAM or more",
-    "24_gb_note": "Start with shorter duration and lower longer-side resolution; add --lowvram through COMFY_ARGS if necessary."
+    "recommended": "NVIDIA A40 48 GB for comfortable headroom",
+    "smaller_gpu_note": "The workflow is advertised for 12 GB VRAM, but longer videos and its two-pass pipeline need more headroom; add --lowvram through COMFY_ARGS only if required."
   }
 }

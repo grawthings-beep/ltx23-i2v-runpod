@@ -1,111 +1,94 @@
-# LTX 2.3 I2V / ComfyUI / RunPod
+# MrXin LTX 2.3 I2V EROS V6.1 on RunPod
 
-The repository is a deterministic RunPod image for the supplied
-`MrXin LTX 2.3 I2V EROS V2` ComfyUI workflow.
+Deterministic RunPod image for the unmodified
+`MrXin LTX 2.3 I2V EROS V6.1.json` ComfyUI workflow.
 
-It does four things and nothing else:
+The image:
 
-1. Builds ComfyUI `v0.17.2`.
-2. Installs the custom-node repositories at pinned commits.
-3. Downloads model files into persistent `/workspace` storage with parallel,
-   resumable `aria2c` transfers.
-4. Starts ComfyUI on port `8188`.
+1. builds ComfyUI `v0.17.2`;
+2. installs 15 custom-node repositories at full commit SHAs;
+3. downloads 15 verified model artifacts into persistent `/workspace` storage;
+4. installs the workflow once without overwriting later user edits;
+5. runs doctor checks, then starts ComfyUI on `0.0.0.0:8188`.
 
-Models are deliberately **not** baked into the container image. The image remains
-small enough to update normally, while models survive Pod replacement on the
-network volume.
+Models are not baked into the Docker image. Downloads use parallel, resumable
+`aria2c` transfers and survive Pod replacement when the same network volume is
+reused.
 
-## Repository layout
+## Workflow provenance
 
-```text
-.
-├── Dockerfile
-├── manifest/
-│   ├── models.json          # model URLs, exact filenames, profiles and destinations
-│   └── nodes.json           # custom-node repositories and pinned commits
-├── scripts/
-│   ├── download_models.py   # parallel/resumable downloader
-│   ├── install_nodes.py     # deterministic custom-node installer
-│   ├── doctor.py            # GPU, disk, model and node preflight
-│   ├── validate_repo.py     # workflow/manifest consistency check
-│   └── start.sh             # idempotent RunPod bootstrap and ComfyUI launch
-├── workflows/
-│   └── MrXin_LTX_2.3_I2V_EROS_V2.json
-├── runpod/
-│   ├── README.md
-│   └── template-settings.json
-└── .github/workflows/
-    ├── build-image.yml
-    └── validate.yml
-```
+- File: `workflows/MrXin LTX 2.3 I2V EROS V6.1.json`
+- Source: [MrXin V6.1 archive](https://huggingface.co/ThirdTimesTheCiarc/workflows/resolve/main/2488266/2962842/mrxinLTX23I2VEros12GBVRAM_i2vV61.zip)
+- Source archive SHA-256: `46ab86520ffb28dd3e131f48727402146d372d3585896cc52efe3ed777c3962f`
+- Workflow JSON SHA-256: `a29ff5b4cecfe2cc399b6590fae299038996169e742e7a4c4a8ae40376aa50cd`
 
-## Model download sources
-
-Every model enabled by the default `MODEL_PROFILE=workflow` has a pinned download
-URL and SHA-256 where available. RunPod only needs `HF_TOKEN` and `CIVITAI_TOKEN`;
-the downloader applies them only at runtime and redacts credentials from error logs.
-
-The disabled LoRAs included only by `MODEL_PROFILE=all` still require:
-
-```text
-MODEL_URL_LTX23_NSFW_FURRY
-MODEL_URL_CUM_SHOT
-MODEL_URL_TITFUCK
-MODEL_URL_ORGASM
-```
-
-With `MODEL_PROFILE=all`, startup fails clearly when one of those optional URLs is
-absent. To inspect ComfyUI without concept LoRAs, use `MODEL_PROFILE=public`.
-
-## GitHub → GHCR
-
-Create a repository named `ltx23-i2v-runpod`, copy these files, and push to `main`.
-The included workflow publishes:
-
-```text
-ghcr.io/<github-owner>/ltx23-i2v-runpod:latest
-ghcr.io/<github-owner>/ltx23-i2v-runpod:sha-<commit>
-```
-
-For a versioned release:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-Use the immutable version tag in production rather than `latest`.
+The workflow content and filename are preserved exactly. The repository contains
+V6.1 only; the former V2 workflow is not included.
 
 ## RunPod template
 
-Use the values in [`runpod/template-settings.json`](runpod/template-settings.json).
-
-Recommended baseline:
+Use `runpod/template-settings.json` as the source of truth.
 
 | Setting | Value |
 |---|---|
-| Image | `ghcr.io/<owner>/ltx23-i2v-runpod:v1.0.0` |
+| Container image | `ghcr.io/grawthings-beep/ltx23-i2v-runpod:latest` |
 | Container disk | 35 GB |
-| Network volume | 250 GB |
+| Network volume | about 250 GB |
 | Volume mount | `/workspace` |
 | HTTP port | `8188` |
-| Start command | empty |
+| Start command | leave empty |
 
-Create RunPod secrets and reference them in template environment variables:
+Create a RunPod secret named exactly `HF_TOKEN`. In the template environment
+variable editor, add a variable named `HF_TOKEN`, select the secret with the key
+icon, and let RunPod render its reference. In raw form it is:
 
 ```text
 HF_TOKEN={{ RUNPOD_SECRET_HF_TOKEN }}
-CIVITAI_TOKEN={{ RUNPOD_SECRET_CIVITAI_TOKEN }}
 ```
 
-Create the RunPod secrets with those exact names, then use the key icon in the
-template environment-variable editor to select each secret.
+Do not add quotes around the reference. The current V6.1 manifest uses pinned
+Hugging Face and GitHub mirrors, so `CIVITAI_TOKEN` and private `MODEL_URL_*`
+variables are not required. The downloader still supports `CIVITAI_TOKEN` for
+future manifest entries.
 
-Do not put tokens into `.env`, Docker build arguments, GitHub files or the image.
+Use these environment variables:
 
-## Storage behavior
+```text
+MODEL_PROFILE=workflow
+DOWNLOAD_CONCURRENCY=5
+DOWNLOAD_CONNECTIONS=16
+DOWNLOAD_MAX_TRIES=10
+NODE_CLONE_CONCURRENCY=6
+ALLOW_MISSING_MODEL_URLS=0
+SKIP_MODEL_DOWNLOAD=0
+COMFY_PORT=8188
+COMFY_ARGS=
+```
 
-Persistent:
+An NVIDIA A40 has ample VRAM for this graph. Leave `COMFY_ARGS` empty initially;
+`--lowvram` is intended only for smaller cards or troubleshooting.
+
+## First start
+
+The default `workflow` profile downloads 12 files totaling about 60.39 GB
+(56.24 GiB). ComfyUI starts only after downloads and doctor checks pass,
+so the RunPod HTTP proxy can return 404 during the initial download. Follow the
+Pod logs for live aria2 progress.
+
+Completed files are validated by exact byte count, safetensors header, and
+SHA-256, then skipped on later starts. `.aria2` partial files are resumed.
+
+The workflow is copied once to:
+
+```text
+/workspace/user/default/workflows/MrXin LTX 2.3 I2V EROS V6.1.json
+```
+
+User edits are never overwritten. If the same volume still contains the old V2
+workflow, delete it manually in ComfyUI or from `/workspace`; bootstrap does not
+delete persistent user files.
+
+## Persistent layout
 
 ```text
 /workspace/models
@@ -116,107 +99,55 @@ Persistent:
 /workspace/logs
 ```
 
-Ephemeral:
+Only `/tmp/comfy` is intentionally ephemeral.
 
-```text
-/tmp/comfy
-```
+## Download profiles
 
-The workflow is copied once to:
+| Profile | Files | Size | Contents |
+|---|---:|---:|---|
+| `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
+| `workflow` | 12 | 60.39 GB | `public` plus the three optional concept LoRAs |
+| `all` | 15 | 85.49 GB | every reference, including bypassed alternate loaders and RIFE |
 
-```text
-/workspace/user/default/workflows/MrXin_LTX_2.3_I2V_EROS_V2.json
-```
-
-User edits are never overwritten on restart.
-
-## Model download profiles
-
-| Profile | Contents |
-|---|---|
-| `public` | Checkpoint, Gemma encoder, spatial upscaler, preview VAE and distilled LoRA |
-| `workflow` | `public` plus every LoRA currently enabled in the workflow |
-| `all` | Every referenced model plus the RIFE interpolation model |
-
-Transfers are concurrent, validate safetensors headers, and resume from `.aria2` state. Existing complete files
-are skipped. Tune with:
-
-```text
-DOWNLOAD_CONCURRENCY=5
-DOWNLOAD_CONNECTIONS=16
-DOWNLOAD_MAX_TRIES=10
-```
-
-Higher values do not always improve throughput and may trigger host rate limits.
-
-## GPU guidance
-
-The supplied graph loads a large LTX 2.3 checkpoint, a 12B text encoder, audio/video
-VAEs, multiple LoRAs, a two-pass latent upscale and tiled final decode. A 48 GB GPU
-is the practical default.
-
-On a 24 GB GPU, first test with a shorter duration and a smaller longer-side value.
-`COMFY_ARGS=--lowvram` can be added if needed, but it is not enabled globally
-because it trades speed for memory and is unnecessary on larger GPUs.
-
-The optional NVIDIA RTX Video Super Resolution editor node requires an NVIDIA RTX
-GPU. The video-editor group is disabled in the supplied workflow, so it does not
-affect the primary I2V run.
+The concept LoRAs referenced by V6.1 are included in `workflow`, even though their
+slots are initially off, so enabling them does not require another URL. `all`
+also downloads the bypassed alternate transformer and upscaler loaders.
 
 ## Local validation
 
-No network access is required for the static checks:
-
 ```bash
+python scripts/validate_repo.py
+python -m compileall scripts
+python -m unittest discover -s tests -v
+bash -n scripts/start.sh
 make validate
 ```
 
-Build locally:
+Build locally when Docker is available:
 
 ```bash
-cp .env.example .env
-docker compose build
-docker compose up
+docker build -t ltx23-i2v-runpod:test .
 ```
 
-Open `http://localhost:8188`.
-
-The first start downloads the selected model profile. The default `workflow`
-profile is currently about 43 GiB. ComfyUI intentionally starts only after every
-selected file has downloaded and passed the doctor checks, so the RunPod HTTP
-proxy can return 404 during this bootstrap phase. Follow the Pod logs for live
-aria2 progress. Later starts skip completed files stored under `/workspace`.
-
-To build and inspect the UI without downloading models:
+For UI-only diagnostics without downloading models:
 
 ```bash
-SKIP_MODEL_DOWNLOAD=1 docker compose up
+SKIP_MODEL_DOWNLOAD=1 docker compose up --build
 ```
 
-## Operational commands
+## GitHub Actions and GHCR
 
-Inside the Pod:
+Pushes and pull requests run static validation. Pushes to `main` and `v*` tags
+build and publish with Docker metadata/build-push actions. The default-branch
+image is:
 
-```bash
-python /opt/bootstrap/scripts/doctor.py \
-  --manifest-root /opt/bootstrap/manifest \
-  --data-root /workspace \
-  --comfy-root /opt/ComfyUI \
-  --profile workflow
-
-python /opt/bootstrap/scripts/doctor.py \
-  --server-url http://127.0.0.1:8188
+```text
+ghcr.io/grawthings-beep/ltx23-i2v-runpod:latest
 ```
-
-Re-download a missing file by deleting only that file and restarting. Partial
-downloads resume automatically.
 
 ## Security and licensing
 
-The container runs only ComfyUI; it does not start Jupyter or an SSH daemon.
-RunPod's web terminal remains available for recovery.
-
-The repository's infrastructure code is MIT-licensed. The workflow, ComfyUI,
-custom nodes and model files retain their respective upstream licenses and usage
-terms. Model tokens and private download URLs are not distributable repository
-content.
+Tokens are runtime RunPod secrets. They must not be committed, passed as Docker
+build arguments, or embedded in model URLs. The infrastructure code is MIT
+licensed; the workflow, ComfyUI, custom nodes, and models retain their respective
+upstream licenses and usage terms.

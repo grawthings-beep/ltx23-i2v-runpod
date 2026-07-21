@@ -2,6 +2,7 @@ import io
 import os
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 import urllib.error
 from unittest.mock import patch
@@ -50,6 +51,16 @@ class FakeProcess:
 
 
 class DownloadModelsTests(unittest.TestCase):
+    def test_exact_size_is_enforced_for_completed_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "model.bin"
+            path.write_bytes(b"abc")
+
+            with self.assertRaisesRegex(RuntimeError, "expected exactly 4"):
+                download_models.validate_model_file(
+                    {"min_bytes": 1, "exact_bytes": 4}, path
+                )
+
     def test_civitai_redirect_is_resolved_before_aria2(self):
         direct_url = (
             "https://b2.civitai.com/file/model.safetensors"

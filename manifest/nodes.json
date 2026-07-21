@@ -15,8 +15,13 @@
         "comfyui-kjnodes"
       ],
       "provides": [
+        "DiffusionModelLoaderKJ",
+        "ImageResizeKJv2",
+        "LTX2_NAG",
+        "LTXVImgToVideoInplaceKJ",
         "LTXVChunkFeedForward",
         "LTX2SamplingPreviewOverride",
+        "VAELoaderKJ",
         "VRAM_Debug"
       ]
     },
@@ -176,6 +181,30 @@
       ],
       "provides": [
         "LTXVSpatioTemporalTiledVAEDecode"
+      ]
+    },
+    {
+      "id": "res4lyf",
+      "repository": "https://github.com/ClownsharkBatwing/RES4LYF.git",
+      "ref": "022c873c6d198c67b3312a1804336533a050df18",
+      "directory": "RES4LYF",
+      "aliases": [
+        "RES4LYF"
+      ],
+      "provides": [
+        "Sigmas Sigmoid"
+      ]
+    },
+    {
+      "id": "comfyliterals",
+      "repository": "https://github.com/M1kep/ComfyLiterals.git",
+      "ref": "bdddb08ca82d90d75d97b1d437a652e0284a32ac",
+      "directory": "ComfyLiterals",
+      "aliases": [
+        "ComfyLiterals"
+      ],
+      "provides": [
+        "Float"
       ]
     }
   ]

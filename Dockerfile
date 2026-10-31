@@ -10,6 +10,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV COMFYUI_ROOT=/opt/ComfyUI \
     BOOTSTRAP_ROOT=/opt/bootstrap \
     DATA_ROOT=/workspace \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:${PATH} \
+    CMAKE_BUILD_PARALLEL_LEVEL=2 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONUNBUFFERED=1
 
@@ -26,11 +29,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       jq \
       libgl1 \
       libglib2.0-0 \
+      python3-venv \
       tini \
       util-linux \
       unzip \
     && rm -rf /var/lib/apt/lists/* \
     && git lfs install --system
+
+RUN python3 -m venv --system-site-packages "${VIRTUAL_ENV}"
 
 RUN git init "${COMFYUI_ROOT}" \
     && git -C "${COMFYUI_ROOT}" remote add origin https://github.com/Comfy-Org/ComfyUI.git \

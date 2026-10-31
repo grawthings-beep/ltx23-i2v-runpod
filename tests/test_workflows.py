@@ -55,6 +55,14 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(settings["environment_variables"]["MODEL_PROFILE"], "dasiwa")
         self.assertIn('MODEL_PROFILE="${MODEL_PROFILE:-dasiwa}"', (ROOT / "scripts/start.sh").read_text())
 
+    def test_container_uses_venv_and_preserves_cuda_before_node_install(self):
+        dockerfile = (ROOT / "Dockerfile").read_text()
+        self.assertIn('python3 -m venv --system-site-packages "${VIRTUAL_ENV}"', dockerfile)
+        self.assertIn("PATH=/opt/venv/bin:${PATH}", dockerfile)
+        self.assertLess(dockerfile.index('packages = ("torch"'), dockerfile.index('/requirements.txt'))
+        self.assertIn("Real entrypoint and node registration smoke test",
+                      (ROOT / ".github/workflows/build-image.yml").read_text())
+
 
 class ModelAliasTests(unittest.TestCase):
     def setUp(self):

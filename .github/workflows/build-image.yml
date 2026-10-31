@@ -54,6 +54,7 @@ jobs:
           load: true
           tags: ltx23-candidate:smoke
           cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Real entrypoint and node registration smoke test
         run: docker run --rm --entrypoint python ltx23-candidate:smoke /opt/bootstrap/scripts/smoke_test.py

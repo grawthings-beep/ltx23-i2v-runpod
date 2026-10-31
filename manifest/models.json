@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
   "profiles": {
+    "dasiwa": "DaSiWa OmniForge C V5.1, including its bypassed DMD, AnimeSharp and RIFE choices; HF access approval is required.",
     "public": "Core models enabled by the MrXin LTX 2.3 I2V EROS V6.1 workflow.",
     "workflow": "Enabled V6.1 models plus its three optional concept LoRAs; disabled alternate loaders are excluded.",
-    "all": "Every model referenced by V6.1, including disabled alternate loaders and RIFE."
+    "all": "All DaSiWa V5.1 and MrXin V6.1 models, including disabled alternate loaders and LoRAs."
   },
   "models": [
     {
@@ -35,9 +36,10 @@
       "id": "gemma-text-encoder",
       "filename": "gemma_3_12B_it_fp8_e4m3fn.safetensors",
       "relative_path": "models/text_encoders/LTX 2.3/gemma_3_12B_it_fp8_e4m3fn.safetensors",
+      "aliases": ["models/text_encoders/gemma_3_12B_it_fp8_e4m3fn.safetensors"],
       "url": "https://huggingface.co/GitMylo/LTX-2-comfy_gemma_fp8_e4m3fn/resolve/c26496d8fab07c9743fd09e24562e246ae009ed6/gemma_3_12B_it_fp8_e4m3fn.safetensors?download=true",
       "source": "huggingface",
-      "profiles": ["public", "workflow", "all"],
+      "profiles": ["public", "workflow", "all", "dasiwa"],
       "auth": "HF_TOKEN",
       "sha256": "38c8ca98d01afc93a04f9fb18255755884b9eb52b7b40080076e9c892609751b",
       "exact_bytes": 13210008986,
@@ -47,9 +49,10 @@
       "id": "ltx23-text-projection",
       "filename": "ltx-2.3_text_projection_bf16.safetensors",
       "relative_path": "models/clip/LTX 2.3/ltx-2.3_text_projection_bf16.safetensors",
+      "aliases": ["models/text_encoders/ltx-2.3_text_projection_bf16.safetensors"],
       "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/text_encoders/ltx-2.3_text_projection_bf16.safetensors?download=true",
       "source": "huggingface",
-      "profiles": ["public", "workflow", "all"],
+      "profiles": ["public", "workflow", "all", "dasiwa"],
       "auth": "HF_TOKEN",
       "sha256": "911d59bb4cb7708179c9a0045ea0fe41212ecfb77aed3a02702b7c0a8274911f",
       "exact_bytes": 2312149072,
@@ -59,9 +62,10 @@
       "id": "ltx23-video-vae",
       "filename": "LTX23_video_vae_bf16.safetensors",
       "relative_path": "models/vae/LTX 2.3/LTX23_video_vae_bf16.safetensors",
+      "aliases": ["models/vae/LTX2/LTX23_video_vae_bf16.safetensors"],
       "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/vae/LTX23_video_vae_bf16.safetensors?download=true",
       "source": "huggingface",
-      "profiles": ["public", "workflow", "all"],
+      "profiles": ["public", "workflow", "all", "dasiwa"],
       "auth": "HF_TOKEN",
       "sha256": "01ea62d09bc139f95c5dee7b5c062ad6a3e6cd8be910a1983ac02e7eb5b8ee3b",
       "exact_bytes": 1452258578,
@@ -71,9 +75,10 @@
       "id": "ltx23-audio-vae",
       "filename": "LTX23_audio_vae_bf16.safetensors",
       "relative_path": "models/vae/LTX 2.3/LTX23_audio_vae_bf16.safetensors",
+      "aliases": ["models/vae/LTX2/LTX23_audio_vae_bf16.safetensors"],
       "url": "https://huggingface.co/Kijai/LTX2.3_comfy/resolve/8e1eabef8e2d67e71bb02baedf12c98805ac36f3/vae/LTX23_audio_vae_bf16.safetensors?download=true",
       "source": "huggingface",
-      "profiles": ["public", "workflow", "all"],
+      "profiles": ["public", "workflow", "all", "dasiwa"],
       "auth": "HF_TOKEN",
       "sha256": "5bc10fa4adecf99dda132d916e23048cbd56797702c5fa50eb5d2079048a38c3",
       "exact_bytes": 364855188,
@@ -83,9 +88,10 @@
       "id": "tae-preview-vae",
       "filename": "taeltx2_3.safetensors",
       "relative_path": "models/vae/LTX 2.3/taeltx2_3.safetensors",
+      "aliases": ["models/vae/LTX2/taeltx2_3.safetensors"],
       "url": "https://raw.githubusercontent.com/madebyollin/taehv/093b918971d59001a0bad6dfd6e0409b5e1752cf/safetensors/taeltx2_3.safetensors",
       "source": "github",
-      "profiles": ["public", "workflow", "all"],
+      "profiles": ["public", "workflow", "all", "dasiwa"],
       "sha256": "f0773b4e3e57318e6aa4dd4a35e1d16213a5f160fbc0376163f06888bbcbe246",
       "exact_bytes": 23531296,
       "min_bytes": 23000000
@@ -187,6 +193,65 @@
       "sha256": "45c7f74156704769dc9f85cfcaf8552e1e926f9399dcfa3a553dee88fac6f53f",
       "exact_bytes": 24636301,
       "min_bytes": 24000000
+    },
+    {
+      "id": "dasiwa-dragonleap-v4-int8-convrot",
+      "filename": "DasiwaLTX23_dragonleapV4_INT8ConvRot.safetensors",
+      "relative_path": "models/diffusion_models/LTX2/DasiwaLTX23_dragonleapV4_INT8ConvRot.safetensors",
+      "url": "https://huggingface.co/darksidewalker/DaSiWa-LTX2.3/resolve/21c8bbd45b93b44a42306c09fa4c8d20d7c7eb88/Distilled/DasiwaLTX23_dragonleapV4-INT8%20ConvRot.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "gated": true,
+      "sha256": "be48b4cc7bc7d38e8fc4b9ef4216b641f58027717fe8cd0724f6f4b83089fdd1",
+      "exact_bytes": 27637479158,
+      "notes": "Author's INT8 ConvRot file, renamed to the exact original V5.1 loader value. Accept access terms at https://huggingface.co/darksidewalker/DaSiWa-LTX2.3 before starting."
+    },
+    {
+      "id": "dasiwa-dmd-v2-lora",
+      "filename": "LTX2.3_DMD_v2_avgrank86_audio160_L80-D20.safetensors",
+      "relative_path": "models/loras/LTX2/Dist/LTX2.3_DMD_v2_avgrank86_audio160_L80-D20.safetensors",
+      "url": "https://huggingface.co/darksidewalker/DaSiWa-LTX2.3/resolve/21c8bbd45b93b44a42306c09fa4c8d20d7c7eb88/Lora/LTX2.3_DMD_v2_avgrank86_audio160_L80-D20.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "gated": true,
+      "sha256": "e8e0a6634a4214bc6c1f0ed240f431d9b9ab61b58b5e2960bcd5a691499f8f4b",
+      "exact_bytes": 2269850040,
+      "notes": "Bypassed in the original graph. Installed without changing that setting."
+    },
+    {
+      "id": "ltx23-spatial-upscaler-x2-v11",
+      "filename": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+      "relative_path": "models/latent_upscale_models/ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+      "url": "https://huggingface.co/Lightricks/LTX-2.3/resolve/c1521179de480464f366a98a9d9b2acc4cc097b9/ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "5f416311fa8172b65af67530758964708d29a317b830d689a51143b7f91913ed",
+      "exact_bytes": 995743560
+    },
+    {
+      "id": "animesharp-v4-fast-rcan-pu",
+      "filename": "2x-AnimeSharpV4_Fast_RCAN_PU.safetensors",
+      "relative_path": "models/upscale_models/2x-AnimeSharpV4_Fast_RCAN_PU.safetensors",
+      "url": "https://huggingface.co/Kim2091/2x-AnimeSharpV4/resolve/1a9339b5c308ab3990f6233be2c1169a75772878/2x-AnimeSharpV4_Fast_RCAN_PU.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "b641c9eb10b43f26538177aa8f0fef8b9fc2a153afd1431d0a062a84c49ce6d0",
+      "exact_bytes": 31359158
+    },
+    {
+      "id": "rife-v426-core",
+      "filename": "rife_v4.26.safetensors",
+      "relative_path": "models/frame_interpolation/rife_v4.26.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/frame_interpolation/resolve/aa7009be4d1471ea0bac91d6fe4d7e4b637cbbfc/frame_interpolation/rife_v4.26.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "151874592c877740e5db11522f4514df569eeafb0a0fcb2696f16e9e8d317c94",
+      "exact_bytes": 22674688
     }
   ]
 }

@@ -2,14 +2,14 @@
   "schema_version": 1,
   "comfyui": {
     "repository": "https://github.com/Comfy-Org/ComfyUI.git",
-    "ref": "v0.17.2",
-    "expected_version": "0.17.2"
+    "ref": "426f5eea52a7ece1dd599fff4cb6cd1f352ddd24",
+    "expected_version": "0.43.0"
   },
   "nodes": [
     {
       "id": "comfyui-kjnodes",
       "repository": "https://github.com/kijai/ComfyUI-KJNodes.git",
-      "ref": "2acdef1766026ff3be00daf3c45f6a064db9100f",
+      "ref": "ab72eda7ffad6280422d71ab7d54d3fb87c0ba18",
       "directory": "ComfyUI-KJNodes",
       "aliases": [
         "comfyui-kjnodes"
@@ -22,7 +22,10 @@
         "LTXVChunkFeedForward",
         "LTX2SamplingPreviewOverride",
         "VAELoaderKJ",
-        "VRAM_Debug"
+        "VRAM_Debug",
+        "LTX2AttentionTunerPatch",
+        "ModelPatchTorchSettings",
+        "PatchTritonVAE"
       ]
     },
     {
@@ -206,6 +209,33 @@
       "provides": [
         "Float"
       ]
+    },
+    {
+      "id": "comfyui-dasiwa-nodes",
+      "repository": "https://github.com/darksidewalker/ComfyUI-DaSiWa-Nodes.git",
+      "ref": "09e12bd94762d02e4c4aa39e1e4247a7b66afaae",
+      "directory": "ComfyUI-DaSiWa-Nodes",
+      "provides": [
+        "DaSiWa_EnhancedVideoCombine", "DaSiWa_LTX2LoraLoader",
+        "DaSiWa_NodeStatusSwitch", "DaSiWa_RTX_FrameGeneration",
+        "DaSiWa_RTX_UpscalerRefiner", "DaSiWa_ResolutionScaleCalculator",
+        "DaSiWa_SeedControl", "DaSiWa_TorchResize", "DaSiWa_Watermark"
+      ],
+      "frontend_files": ["js/dasiwa_label.js"]
+    },
+    {
+      "id": "whatdreamscost-comfyui",
+      "repository": "https://github.com/WhatDreamsCost/WhatDreamsCost-ComfyUI.git",
+      "ref": "a3c809c8b593a74c2ddcd6c1f83ad85ebebe3c64",
+      "directory": "WhatDreamsCost-ComfyUI",
+      "provides": ["LTXDirector", "LTXDirectorGuide", "LTXDirectorCropGuides"]
+    },
+    {
+      "id": "comfyui-gguf",
+      "repository": "https://github.com/city96/ComfyUI-GGUF.git",
+      "ref": "6ea2651e7df66d7585f6ffee804b20e92fb38b8a",
+      "directory": "ComfyUI-GGUF",
+      "provides": ["DualCLIPLoaderGGUF", "UnetLoaderGGUF"]
     }
   ]
 }

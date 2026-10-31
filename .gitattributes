@@ -1,0 +1,3 @@
+# Keep author-supplied workflow hashes identical on Windows and Linux.
+workflows/*.json -text
+*.sh text eol=lf

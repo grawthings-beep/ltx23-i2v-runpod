@@ -1,0 +1,34 @@
+{
+  "default_profile": "dasiwa",
+  "frontend_types": ["Note", "MarkdownNote", "Reroute", "Lable (DaSiWa)", "Fast Groups Bypasser (rgthree)"],
+  "core_types": [
+    "AudioAdjustVolume", "BasicScheduler", "CFGGuider", "CLIPTextEncode",
+    "ColorTransfer", "ComfyMathExpression", "ComfySwitchNode", "ConditioningZeroOut",
+    "DualCLIPLoader", "EmptyImage", "EmptyLTXVLatentVideo", "FrameInterpolate",
+    "FrameInterpolationModelLoader", "GetImageSize", "ImageScaleBy",
+    "ImageUpscaleWithModel", "KSamplerSelect", "LTXVAudioVAEDecode",
+    "LTXVAudioVAEEncode", "LTXVConcatAVLatent", "LTXVConditioning", "LTXVCropGuides",
+    "LTXVEmptyLatentAudio", "LTXVLatentUpsampler", "LTXVPreprocess", "LTXVScheduler",
+    "LTXVSeparateAVLatent", "LatentUpscaleModelLoader", "LoadImage",
+    "LoraLoaderModelOnly", "ManualSigmas", "ModelAttentionBackend", "PreviewImage",
+    "PrimitiveBoolean", "RandomNoise", "ResizeImageMaskNode", "SamplerCustomAdvanced",
+    "SetLatentNoiseMask", "SolidMask", "UNETLoader", "UpscaleModelLoader", "VAEDecode", "VAELoader"
+  ],
+  "workflows": [
+    {
+      "filename": "DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json",
+      "profile": "dasiwa",
+      "sha256": "d826b97f4076025b3b6b6c5f8ac2e2f61f64f5ae5dcd359a2a12a9c5f1356841",
+      "node_count": 116,
+      "empty_link_placeholders": 1
+    },
+    {
+      "filename": "MrXin LTX 2.3 I2V EROS V6.1.json",
+      "profile": "workflow",
+      "sha256": "a29ff5b4cecfe2cc399b6590fae299038996169e742e7a4c4a8ae40376aa50cd",
+      "strip_trailing_newlines": true,
+      "node_count": 154,
+      "empty_link_placeholders": 0
+    }
+  ]
+}

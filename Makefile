@@ -20,5 +20,5 @@ doctor:
 		--manifest-root /opt/bootstrap/manifest \
 		--data-root /workspace \
 		--comfy-root /opt/ComfyUI \
-		--profile "$${MODEL_PROFILE:-workflow}" \
+		--profile "$${MODEL_PROFILE:-dasiwa}" \
 		--server-url http://127.0.0.1:8188

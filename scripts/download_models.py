@@ -18,6 +18,11 @@ import urllib.parse
 import urllib.request
 import zipfile
 
+if __package__:
+    from .workflow_contract import model_path
+else:
+    from workflow_contract import model_path
+
 
 CIVITAI_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -311,14 +316,66 @@ def verify_sha256(path: Path, expected: str) -> None:
         raise RuntimeError(f"SHA256 mismatch for {path}: expected {expected}, got {actual}")
 
 
+def create_model_aliases(model: dict, data_root: Path) -> None:
+    source = model_path(data_root, model["relative_path"])
+    for relative in model.get("aliases", []):
+        alias = model_path(data_root, relative)
+        if alias.exists():
+            if not alias.samefile(source):
+                # Never replace a different user-supplied artifact silently.
+                validate_model_file(model, alias)
+                verify_sha256(alias, model["sha256"])
+            continue
+        if alias.is_symlink():
+            raise RuntimeError(f"broken model alias: {alias}")
+        alias.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            alias.hardlink_to(source)
+        except OSError:
+            alias.symlink_to(os.path.relpath(source, alias.parent))
+
+
+def check_gated_access(models: list[dict], data_root: Path) -> None:
+    opener = urllib.request.build_opener(NoRedirectHandler())
+    for model in models:
+        if not model.get("gated"):
+            continue
+        destination = model_path(data_root, model["relative_path"])
+        try:
+            validate_model_file(model, destination)
+            continue
+        except RuntimeError:
+            pass
+        token = os.environ.get(model["auth"], "").strip()
+        help_text = (
+            "Accept the model terms at https://huggingface.co/darksidewalker/DaSiWa-LTX2.3 "
+            "and provide HF_TOKEN using a RunPod Secret with gated-repository read access."
+        )
+        if not token:
+            raise RuntimeError(f"{model['id']}: HF_TOKEN is required. {help_text}")
+        request = urllib.request.Request(
+            model["url"], headers={"Authorization": f"Bearer {token}"}, method="HEAD"
+        )
+        try:
+            with opener.open(request, timeout=30):
+                pass
+        except urllib.error.HTTPError as exc:
+            status = exc.code
+            exc.close()
+            if status not in CIVITAI_REDIRECT_STATUSES:
+                raise RuntimeError(f"{model['id']}: HTTP {status}. {help_text}") from None
+        except urllib.error.URLError:
+            raise RuntimeError(f"{model['id']}: could not verify Hugging Face access; retry later") from None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument(
         "--profile",
-        choices=("public", "workflow", "all"),
-        default=os.environ.get("MODEL_PROFILE", "workflow"),
+        choices=("dasiwa", "public", "workflow", "all"),
+        default=os.environ.get("MODEL_PROFILE", "dasiwa"),
     )
     parser.add_argument(
         "--allow-missing-urls",
@@ -329,13 +386,18 @@ def main() -> int:
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     models = selected_models(manifest, args.profile)
+    try:
+        check_gated_access(models, args.data_root)
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     downloads: list[tuple[str, Path, list[str]]] = []
     archives: list[tuple[dict, Path, Path]] = []
     missing: list[str] = []
     missing_ids: set[str] = set()
 
     for model in models:
-        destination = args.data_root / model["relative_path"]
+        destination = model_path(args.data_root, model["relative_path"])
         if remove_invalid_existing(model, destination):
             print(f"[skip] {model['id']}: {destination}")
             continue
@@ -386,7 +448,7 @@ def main() -> int:
 
     failed: list[str] = []
     for model in models:
-        destination = args.data_root / model["relative_path"]
+        destination = model_path(args.data_root, model["relative_path"])
         if not is_complete(destination):
             if model["id"] not in missing_ids:
                 failed.append(f"{model['id']}: {destination}")
@@ -404,6 +466,10 @@ def main() -> int:
         for item in failed:
             print(f"  - {item}", file=sys.stderr)
         return 3
+
+    for model in models:
+        if model["id"] not in missing_ids:
+            create_model_aliases(model, args.data_root)
 
     print(f"Model profile '{args.profile}' is ready ({len(models) - len(missing)}/{len(models)} files).")
     return 0

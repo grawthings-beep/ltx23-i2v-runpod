@@ -1,9 +1,10 @@
 {
-  "name": "ltx23-i2v-eros-v61",
+  "name": "ltx23-dasiwa-v51",
   "container_image": "ghcr.io/grawthings-beep/ltx23-i2v-runpod:latest",
   "container_disk_gb": 35,
   "volume_mount_path": "/workspace",
-  "recommended_network_volume_gb": 250,
+  "recommended_volume_disk_gb": 120,
+  "network_volume_required": false,
   "http_ports": [
     {
       "label": "ComfyUI",
@@ -11,7 +12,7 @@
     }
   ],
   "environment_variables": {
-    "MODEL_PROFILE": "workflow",
+    "MODEL_PROFILE": "dasiwa",
     "DOWNLOAD_CONCURRENCY": "5",
     "DOWNLOAD_CONNECTIONS": "16",
     "ALLOW_MISSING_MODEL_URLS": "0",
@@ -26,6 +27,6 @@
   },
   "gpu_guidance": {
     "recommended": "NVIDIA A40 48 GB for comfortable headroom",
-    "smaller_gpu_note": "The workflow is advertised for 12 GB VRAM, but longer videos and its two-pass pipeline need more headroom; add --lowvram through COMFY_ARGS only if required."
+    "smaller_gpu_note": "CUDA 12.8 image supports Ada and Blackwell with a compatible host driver. DaSiWa's original 900p preset is retained; fit and speed on 24/32 GB cards must be measured. Add --lowvram only if required."
   }
 }

@@ -20,6 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate source
+        run: make validate
+
+      - name: Free runner space for CUDA image
+        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
@@ -40,7 +46,19 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
-      - name: Build and push
+      - name: Build candidate
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: ltx23-candidate:smoke
+          cache-from: type=gha
+
+      - name: Real entrypoint and node registration smoke test
+        run: docker run --rm --entrypoint python ltx23-candidate:smoke /opt/bootstrap/scripts/smoke_test.py
+
+      - name: Publish verified candidate
         uses: docker/build-push-action@v6
         with:
           context: .

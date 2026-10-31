@@ -5,7 +5,7 @@ COMFYUI_ROOT="${COMFYUI_ROOT:-/opt/ComfyUI}"
 DATA_ROOT="${DATA_ROOT:-/workspace}"
 BOOTSTRAP_ROOT="${BOOTSTRAP_ROOT:-/opt/bootstrap}"
 COMFY_PORT="${COMFY_PORT:-8188}"
-MODEL_PROFILE="${MODEL_PROFILE:-workflow}"
+MODEL_PROFILE="${MODEL_PROFILE:-dasiwa}"
 
 log() {
   printf '[bootstrap] %s\n' "$*" >&2
@@ -81,7 +81,6 @@ doctor_args=(
   --data-root "${DATA_ROOT}"
   --comfy-root "${COMFYUI_ROOT}"
   --profile "${MODEL_PROFILE}"
-  --workflow "${DATA_ROOT}/user/default/workflows/MrXin LTX 2.3 I2V EROS V6.1.json"
 )
 if [[ "${SKIP_MODEL_DOWNLOAD:-0}" == "1" ]]; then
   doctor_args+=(--skip-models)

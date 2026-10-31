@@ -14,9 +14,10 @@ import urllib.request
 
 def main():
     bootstrap = Path(os.environ.get("BOOTSTRAP_ROOT", "/opt/bootstrap"))
+    subprocess.run([sys.executable, str(bootstrap / "scripts/check_runtime.py"), "--cpu-smoke"], check=True)
     with tempfile.TemporaryDirectory(prefix="ltx-smoke-") as directory:
         env = {**os.environ, "DATA_ROOT": directory, "SKIP_MODEL_DOWNLOAD": "1",
-               "COMFY_PORT": "8188", "COMFY_ARGS": "--cpu --disable-api-nodes --disable-assets"}
+               "COMFY_PORT": "8188", "COMFY_ARGS": "--cpu --offline --disable-assets"}
         log_path = Path(directory) / "entrypoint.log"
         with log_path.open("w+") as log:
             process = subprocess.Popen(["bash", str(bootstrap / "scripts/start.sh")], env=env,
@@ -35,12 +36,12 @@ def main():
                 else:
                     raise RuntimeError("entrypoint did not become ready within 240s")
                 subprocess.run([sys.executable, str(bootstrap / "scripts/doctor.py"),
-                                "--skip-models", "--server-url", "http://127.0.0.1:8188"],
+                                "--skip-models", "--cpu-smoke", "--server-url", "http://127.0.0.1:8188"],
                                env=env, check=True)
                 for source in (bootstrap / "workflows").glob("*.json"):
                     installed = Path(directory) / "user/default/workflows" / source.name
                     assert installed.read_bytes() == source.read_bytes(), source.name
-                print("PASS: real entrypoint, HTTP API, both workflow node schemas, exact workflow installation")
+                print("PASS: real entrypoint, HTTP API, CPU-loadable workflow node schemas, exact workflow installation; GPU-only RTX checked for bundled SDK dependencies")
             finally:
                 process.terminate()
                 try:

@@ -63,6 +63,7 @@ export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:T
 export MALLOC_TRIM_THRESHOLD_="${MALLOC_TRIM_THRESHOLD_:-65536}"
 
 if [[ "${SKIP_MODEL_DOWNLOAD:-0}" != "1" ]]; then
+  python "${BOOTSTRAP_ROOT}/scripts/check_runtime.py"
   exec 9>"${DATA_ROOT}/.bootstrap/models.lock"
   flock 9
   log "ensuring model profile '${MODEL_PROFILE}'"

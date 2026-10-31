@@ -1,6 +1,7 @@
 {
   "default_profile": "dasiwa",
-  "frontend_types": ["Note", "MarkdownNote", "Reroute", "Lable (DaSiWa)", "Fast Groups Bypasser (rgthree)"],
+  "frontend_types": ["Note", "MarkdownNote", "Reroute", "Lable (DaSiWa)", "Fast Groups Bypasser (rgthree)", "easy getNode", "easy setNode"],
+  "gpu_only_types": ["RTXVideoSuperResolution"],
   "core_types": [
     "AudioAdjustVolume", "BasicScheduler", "CFGGuider", "CLIPTextEncode",
     "ColorTransfer", "ComfyMathExpression", "ComfySwitchNode", "ConditioningZeroOut",

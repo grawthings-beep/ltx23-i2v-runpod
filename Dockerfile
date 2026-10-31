@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-ARG BASE_IMAGE=pytorch/pytorch:2.10.0-cuda12.8-cudnn9-runtime@sha256:b85566342b86d13a67712e9315d40cdc2dad7f8d86df1aff3831f80835edbcca
+ARG BASE_IMAGE=pytorch/pytorch:2.10.0-cuda13.0-cudnn9-runtime@sha256:1f57418aedd9a4d0d3a59646619e1d4f82cacc33817247cead4f749e1f452d4b
 FROM ${BASE_IMAGE}
 
 ARG COMFYUI_REF=426f5eea52a7ece1dd599fff4cb6cd1f352ddd24
@@ -46,7 +46,7 @@ RUN git init "${COMFYUI_ROOT}" \
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m pip install --upgrade pip setuptools wheel \
     && python -m pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 \
-      --index-url https://download.pytorch.org/whl/cu128
+      --index-url https://download.pytorch.org/whl/cu130
 
 # Preserve the CUDA/PyTorch stack before installing either core or custom nodes.
 # A custom-node requirement that requests an incompatible core package fails
@@ -80,13 +80,13 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY manifest/models.json manifest/workflows.json /opt/bootstrap/manifest/
 COPY workflows /opt/bootstrap/workflows
-COPY scripts/download_models.py scripts/doctor.py scripts/start.sh scripts/workflow_contract.py scripts/smoke_test.py /opt/bootstrap/scripts/
+COPY scripts/download_models.py scripts/doctor.py scripts/start.sh scripts/workflow_contract.py scripts/smoke_test.py scripts/check_runtime.py /opt/bootstrap/scripts/
 
 RUN chmod +x /opt/bootstrap/scripts/*.py /opt/bootstrap/scripts/*.sh \
     && python -m compileall -q /opt/bootstrap/scripts \
     && mkdir -p /workspace
 
-RUN python -c "import torch, torchvision, torchaudio, triton; assert torch.__version__.startswith('2.10.0'); assert torch.version.cuda == '12.8'"
+RUN python -c "import torch, torchvision, torchaudio, triton; assert torch.__version__.startswith('2.10.0'); assert torch.version.cuda == '13.0'"
 
 EXPOSE 8188
 

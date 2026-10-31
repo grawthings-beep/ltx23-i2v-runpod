@@ -43,6 +43,8 @@ A local Volume Disk does not restrict GPU region selection. Its contents are
 lost when the Pod is terminated. To use both workflows select `MODEL_PROFILE=all`
 and allocate at least 200 GB for models and output. Existing LoRAs are never deleted.
 
-The same CUDA 12.8 image targets both 4090 and 5090; the host driver must support
-that runtime. Leave `COMFY_ARGS` empty initially. The original 900p preset is
+The same CUDA 13.0 image targets both 4090 and 5090; choose a host whose driver
+supports CUDA 13.0 or newer. CUDA 12.x disables ComfyUI 0.43's optimized INT8
+CUDA kernels. Startup checks the GPU and VFX SDK before downloading models.
+Leave `COMFY_ARGS` empty initially. The original 900p preset is
 unchanged; CPU build tests do not measure VRAM usage or generation speed.

@@ -76,6 +76,7 @@
       "repository": "https://github.com/yolain/ComfyUI-Easy-Use.git",
       "ref": "d60b61d5759b020eff3356b3d395a1adb5456869",
       "directory": "ComfyUI-Easy-Use",
+      "frontend_files": ["web_version/v1/js/getset.js"],
       "aliases": [
         "comfyui-easy-use"
       ],
@@ -177,7 +178,7 @@
     {
       "id": "comfyui-ltxvideo",
       "repository": "https://github.com/Lightricks/ComfyUI-LTXVideo.git",
-      "ref": "531512f7286963dc7aff1fd8bf5556e95eae03af",
+      "ref": "220e1d45aa0469f518e982102fca4dca92a61862",
       "directory": "ComfyUI-LTXVideo",
       "aliases": [
         "ComfyUI-LTXVideo"

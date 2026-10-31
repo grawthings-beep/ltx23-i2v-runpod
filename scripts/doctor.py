@@ -27,6 +27,7 @@ def main() -> int:
     parser.add_argument("--workflow", type=Path)
     parser.add_argument("--server-url")
     parser.add_argument("--skip-models", action="store_true")
+    parser.add_argument("--cpu-smoke", action="store_true")
     args = parser.parse_args()
 
     errors: list[str] = []
@@ -110,6 +111,12 @@ def main() -> int:
             for entry in catalog["workflows"]:
                 bundled = args.manifest_root.parent / "workflows" / entry["filename"]
                 required_types.update(backend_types(json.loads(bundled.read_bytes()), catalog))
+            if args.cpu_smoke:
+                import torch
+                if torch.cuda.is_available():
+                    raise RuntimeError("CPU smoke exclusions are only allowed without a GPU")
+                required_types.difference_update(catalog["gpu_only_types"])
+                warnings.append("GPU-only RTXVideoSuperResolution registration requires host libcuda; audited separately, not executed in CPU CI")
             missing_types = sorted(required_types - set(object_info))
             if missing_types:
                 errors.append("server missing node types: " + ", ".join(missing_types))

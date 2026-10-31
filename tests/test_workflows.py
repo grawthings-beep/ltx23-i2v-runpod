@@ -42,6 +42,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("LTXDirector", types)
         self.assertIn("PatchTritonVAE", types)
         self.assertNotIn("Lable (DaSiWa)", types)
+        self.assertIn("easy getNode", self.catalog["frontend_types"])
+        self.assertEqual(self.catalog["gpu_only_types"], ["RTXVideoSuperResolution"])
         self.assertNotIn(self.workflow["definitions"]["subgraphs"][0]["id"], types)
 
     def test_broken_serialized_link_is_rejected(self):
@@ -59,6 +61,7 @@ class WorkflowTests(unittest.TestCase):
         dockerfile = (ROOT / "Dockerfile").read_text()
         self.assertIn('python3 -m venv --system-site-packages "${VIRTUAL_ENV}"', dockerfile)
         self.assertIn("PATH=/opt/venv/bin:${PATH}", dockerfile)
+        self.assertIn("https://download.pytorch.org/whl/cu130", dockerfile)
         self.assertLess(dockerfile.index('packages = ("torch"'), dockerfile.index('/requirements.txt'))
         self.assertIn("Real entrypoint and node registration smoke test",
                       (ROOT / ".github/workflows/build-image.yml").read_text())

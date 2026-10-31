@@ -27,6 +27,6 @@
   },
   "gpu_guidance": {
     "recommended": "NVIDIA A40 48 GB for comfortable headroom",
-    "smaller_gpu_note": "CUDA 12.8 image supports Ada and Blackwell with a compatible host driver. DaSiWa's original 900p preset is retained; fit and speed on 24/32 GB cards must be measured. Add --lowvram only if required."
+    "smaller_gpu_note": "CUDA 13.0 image supports Ada and Blackwell; select a host with a CUDA 13-compatible driver. DaSiWa's original 900p preset is retained; fit and speed on 24/32 GB cards must be measured. Add --lowvram only if required."
   }
 }

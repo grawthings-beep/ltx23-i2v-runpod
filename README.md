@@ -6,7 +6,7 @@ The existing `MrXin LTX 2.3 I2V EROS V6.1.json` is retained unchanged.
 
 The image:
 
-1. builds ComfyUI `v0.43.0` at a fixed commit on PyTorch 2.10.0 / CUDA 12.8;
+1. builds ComfyUI `v0.43.0` at a fixed commit on PyTorch 2.10.0 / CUDA 13.0;
 2. installs 18 custom-node repositories at full commit SHAs;
 3. downloads the selected model profile into `/workspace` storage;
 4. installs both original workflows once without overwriting later user edits;
@@ -84,8 +84,11 @@ COMFY_PORT=8188
 COMFY_ARGS=
 ```
 
-CUDA 12.8 supports both RTX 4090 and 5090 with a compatible host driver; the same
-image is used. The original 900p preset's GPU memory fit and generation speed
+CUDA 13.0 supports both RTX 4090 and 5090 with a CUDA 13-compatible host driver;
+the same image is used. ComfyUI 0.43 disables optimized comfy-kitchen CUDA kernels
+on CUDA 12.x, so this INT8 ConvRot workflow intentionally uses CUDA 13.0.
+Before downloading models, startup checks real GPU computation and the NVIDIA
+VFX SDK import. The original 900p preset's GPU memory fit and generation speed
 are not validated by CPU CI. Leave `COMFY_ARGS` empty initially and use
 `--lowvram` only if needed. A 48 GB GPU gives more headroom.
 
@@ -164,7 +167,11 @@ SKIP_MODEL_DOWNLOAD=1 docker compose up --build
 
 Pushes and pull requests run workflow/hash/link/model-path tests. Image builds
 launch the real entrypoint in a disposable CPU container and check `/object_info`
-for every backend type in both workflows before publishing. This does not run
+for every CPU-loadable backend type in both workflows before publishing. The
+legacy GPU-only `RTXVideoSuperResolution` requires host `libcuda.so.1`, so CPU CI
+audits its bundled SDK libraries and their dependencies instead of pretending to
+execute it. Easy-Use Get/Set and DaSiWa Label are frontend nodes, not missing
+Python classes. This does not run
 video inference or verify GPU kernels, quality, optional RTX effects or timing.
 Pushes to `main` and `v*` tags publish with Docker metadata/build-push actions. The default-branch
 image is:

@@ -29,13 +29,24 @@ class WorkflowTests(unittest.TestCase):
         names = {"/".join(p.split("/")[2:]) for m in models
                  for p in [m["relative_path"], *m.get("aliases", [])]}
         self.assertFalse(model_references(self.workflow) - names)
-        self.assertEqual(len(models), 10)
+        self.assertEqual(len(models), 12)
         self.assertNotIn("ltx2310eros-v1-fp8", {m["id"] for m in models})
 
     def test_original_profiles_and_loras_remain(self):
         self.assertEqual(len(download_models.selected_models(self.manifest, "public")), 9)
-        self.assertEqual(len(download_models.selected_models(self.manifest, "workflow")), 12)
-        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 20)
+        self.assertEqual(len(download_models.selected_models(self.manifest, "workflow")), 14)
+        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 22)
+
+    def test_user_loras_are_downloaded_without_enabling_workflow_slots(self):
+        expected = {"FOOT.safetensors", "LTX2.3_reasoning_I2V_V3.safetensors"}
+        private = [m for m in self.manifest["models"] if m.get("resolve_hf_metadata")]
+        self.assertEqual({m["filename"] for m in private}, expected)
+        for model in private:
+            self.assertEqual(set(model["profiles"]), {"dasiwa", "workflow", "all"})
+            self.assertEqual(model["relative_path"], "models/loras/LTX2/User/" + model["filename"])
+            self.assertEqual(model["auth"], "HF_TOKEN")
+        loader = next(n for n in self.workflow["nodes"] if n["type"] == "DaSiWa_LTX2LoraLoader")
+        self.assertTrue(all(slot["lora"] == "None" for slot in json.loads(loader["widgets_values"][0])))
 
     def test_subgraph_ids_and_frontend_labels_are_not_missing_backend_nodes(self):
         types = backend_types(self.workflow, self.catalog)

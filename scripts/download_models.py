@@ -42,6 +42,102 @@ def selected_models(manifest: dict, profile: str) -> list[dict]:
     return [model for model in manifest["models"] if profile in model.get("profiles", [])]
 
 
+def hf_metadata_source(model: dict) -> tuple[str, str, str]:
+    parsed = urllib.parse.urlsplit(model["url"])
+    parts = urllib.parse.unquote(parsed.path).strip("/").split("/", 4)
+    if (parsed.scheme != "https" or parsed.netloc != "huggingface.co"
+            or parsed.query or parsed.fragment or len(parts) != 5
+            or parts[2] != "resolve"
+            or not re.fullmatch(r"[\w.-]+/[\w.-]+", "/".join(parts[:2]))
+            or not re.fullmatch(r"main|[0-9a-f]{40}", parts[3])
+            or any(p in ("", ".", "..") for p in parts[4].split("/"))
+            or any(c in parts[4] for c in "\\\r\n")):
+        raise RuntimeError(f"{model['id']}: invalid Hugging Face metadata source")
+    return "/".join(parts[:2]), parts[3], parts[4]
+
+
+def apply_hf_metadata(model: dict, metadata: dict) -> dict:
+    repo, requested_revision, filename = hf_metadata_source(model)
+    revision = metadata.get("revision", "")
+    digest = metadata.get("sha256", "")
+    size = metadata.get("exact_bytes")
+    if (metadata.get("source_url") != model["url"]
+            or not isinstance(revision, str) or not re.fullmatch(r"[0-9a-f]{40}", revision)
+            or (requested_revision != "main" and revision != requested_revision)
+            or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or type(size) is not int or size <= 0):
+        raise RuntimeError(f"{model['id']}: invalid Hugging Face integrity metadata")
+    return {**model, "sha256": digest, "exact_bytes": size,
+            "url": f"https://huggingface.co/{repo}/resolve/{revision}/"
+                   + urllib.parse.quote(filename, safe="/")}
+
+
+def resolve_hf_models(models: list[dict], data_root: Path, *, allow_network: bool = True) -> list[dict]:
+    """Lock private files to Hub integrity metadata before any download or resume."""
+    resolved, repositories = [], {}
+    for model in models:
+        if not model.get("resolve_hf_metadata"):
+            resolved.append(model)
+            continue
+        repo, revision, filename = hf_metadata_source(model)
+        cache_key = hashlib.sha256(model["url"].encode()).hexdigest()
+        cache = data_root / "cache" / "model-metadata" / f"{cache_key}.json"
+        if not cache.resolve().is_relative_to(data_root.resolve()):
+            raise RuntimeError(f"{model['id']}: metadata cache escapes data root")
+        if cache.is_file():
+            try:
+                metadata = json.loads(cache.read_text(encoding="utf-8"))
+                resolved.append(apply_hf_metadata(model, metadata))
+            except (ValueError, AttributeError, TypeError, RuntimeError):
+                raise RuntimeError(f"{model['id']}: invalid metadata cache: {cache}") from None
+            continue
+        if not allow_network:
+            raise RuntimeError(f"{model['id']}: missing verified metadata; run download_models.py first")
+        token = os.environ.get("HF_TOKEN", "").strip()
+        help_text = f"HF_TOKEN must have read access to the private repository {repo}."
+        if not token:
+            raise RuntimeError(f"{model['id']}: {help_text}")
+        key = (repo, revision)
+        if key not in repositories:
+            request = urllib.request.Request(
+                f"https://huggingface.co/api/models/{repo}/revision/{revision}?blobs=true",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            try:
+                with urllib.request.build_opener(NoRedirectHandler()).open(request, timeout=30) as response:
+                    repositories[key] = json.load(response)
+            except urllib.error.HTTPError as exc:
+                status = exc.code
+                exc.close()
+                raise RuntimeError(f"{model['id']}: metadata HTTP {status}. {help_text}") from None
+            except (urllib.error.URLError, TimeoutError, ValueError):
+                raise RuntimeError(f"{model['id']}: could not read Hugging Face metadata; retry later") from None
+        info = repositories[key]
+        try:
+            matches = [f for f in info["siblings"] if f["rfilename"] == filename]
+            if len(matches) != 1:
+                raise ValueError("missing or ambiguous file")
+            file = matches[0]
+            if file["size"] != file["lfs"]["size"]:
+                raise ValueError("inconsistent file size")
+            metadata = {"source_url": model["url"], "revision": info["sha"],
+                        "sha256": file["lfs"]["sha256"], "exact_bytes": file["size"]}
+            verified = apply_hf_metadata(model, metadata)
+        except (KeyError, TypeError, ValueError):
+            raise RuntimeError(f"{model['id']}: missing file or SHA256/size metadata on Hugging Face") from None
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=cache.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+            json.dump(metadata, handle)
+        try:
+            temporary.replace(cache)
+        finally:
+            temporary.unlink(missing_ok=True)
+        print(f"[metadata] {model['id']}: {verified['exact_bytes']} bytes, revision {info['sha']}")
+        resolved.append(verified)
+    return resolved
+
+
 def resolved_url(model: dict) -> str | None:
     if model.get("url"):
         return model["url"]
@@ -387,6 +483,7 @@ def main() -> int:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     models = selected_models(manifest, args.profile)
     try:
+        models = resolve_hf_models(models, args.data_root)
         check_gated_access(models, args.data_root)
     except RuntimeError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

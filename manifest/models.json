@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "profiles": {
-    "dasiwa": "DaSiWa OmniForge C V5.1, including its bypassed DMD, AnimeSharp and RIFE choices; HF access approval is required.",
+    "dasiwa": "DaSiWa OmniForge C V5.1, including its bypassed DMD, AnimeSharp and RIFE choices and two user LoRAs; HF gated and private repository access is required.",
     "public": "Core models enabled by the MrXin LTX 2.3 I2V EROS V6.1 workflow.",
-    "workflow": "Enabled V6.1 models plus its three optional concept LoRAs; disabled alternate loaders are excluded.",
+    "workflow": "Enabled V6.1 models plus its three optional concept LoRAs and two user LoRAs; disabled alternate loaders are excluded.",
     "all": "All DaSiWa V5.1 and MrXin V6.1 models, including disabled alternate loaders and LoRAs."
   },
   "models": [
@@ -252,6 +252,28 @@
       "auth": "HF_TOKEN",
       "sha256": "151874592c877740e5db11522f4514df569eeafb0a0fcb2696f16e9e8d317c94",
       "exact_bytes": 22674688
+    },
+    {
+      "id": "uwgm-foot-lora",
+      "filename": "FOOT.safetensors",
+      "relative_path": "models/loras/LTX2/User/FOOT.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/FOOT.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "resolve_hf_metadata": true,
+      "notes": "Private user LoRA. Resolve and cache the commit, exact size and SHA256 using HF_TOKEN before downloading. Installed, not enabled in either workflow."
+    },
+    {
+      "id": "uwgm-ltx23-reasoning-i2v-v3-lora",
+      "filename": "LTX2.3_reasoning_I2V_V3.safetensors",
+      "relative_path": "models/loras/LTX2/User/LTX2.3_reasoning_I2V_V3.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-loras/resolve/main/LTX2.3_reasoning_I2V_V3.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "resolve_hf_metadata": true,
+      "notes": "Private user LoRA. Resolve and cache the commit, exact size and SHA256 using HF_TOKEN before downloading. Installed, not enabled in either workflow."
     }
   ]
 }

@@ -13,8 +13,10 @@ import sys
 import urllib.request
 
 if __package__:
+    from .download_models import resolve_hf_models
     from .workflow_contract import backend_types, model_path
 else:
+    from download_models import resolve_hf_models
     from workflow_contract import backend_types, model_path
 
 
@@ -66,6 +68,11 @@ def main() -> int:
     if not args.skip_models:
         for model in models["models"]:
             if args.profile not in model.get("profiles", []):
+                continue
+            try:
+                model = resolve_hf_models([model], args.data_root, allow_network=False)[0]
+            except RuntimeError as exc:
+                errors.append(str(exc))
                 continue
             path = model_path(args.data_root, model["relative_path"])
             if not path.is_file() or path.stat().st_size == 0:

@@ -65,8 +65,11 @@ icon, and let RunPod render its reference. In raw form it is:
 HF_TOKEN={{ RUNPOD_SECRET_HF_TOKEN }}
 ```
 
-Do not add quotes around the reference. The manifests use pinned
-Hugging Face and GitHub mirrors, so `CIVITAI_TOKEN` and private `MODEL_URL_*`
+The token also needs read access to the private `uwgm/nikke-loras` repository
+for the two user-requested LoRAs. No additional environment variable is needed.
+
+Do not add quotes around the reference. Models use
+Hugging Face and GitHub sources, so `CIVITAI_TOKEN` and private `MODEL_URL_*`
 variables are not required. The downloader still supports `CIVITAI_TOKEN` for
 future manifest entries.
 
@@ -94,14 +97,26 @@ are not validated by CPU CI. Leave `COMFY_ARGS` empty initially and use
 
 ## First start
 
-The default `dasiwa` profile downloads 10 files totaling about 48.32 GB.
-Gated-repository access is checked before starting large downloads.
+The default `dasiwa` profile downloads 12 files: about 48.32 GB of workflow models
+plus the two private user LoRAs. Their sizes are reported at startup.
+Gated/private-repository access is checked before starting large downloads.
 ComfyUI starts only after downloads and doctor checks pass,
 so the RunPod HTTP proxy can return 404 during the initial download. Follow the
 Pod logs for live aria2 progress.
 
 Completed files are validated by exact byte count, safetensors header, and
 SHA-256, then skipped on later starts. `.aria2` partial files are resumed.
+
+`FOOT.safetensors` and `LTX2.3_reasoning_I2V_V3.safetensors` are installed in
+`/workspace/models/loras/LTX2/User/`. They appear in the LoRA selector but are
+not automatically enabled. The original workflow JSON remains unchanged.
+On first use, startup obtains their exact size, SHA-256 and commit from the
+authenticated Hugging Face metadata API, then downloads the commit-pinned URLs
+with the existing parallel downloader and verifies both files. Metadata is
+cached in `/workspace/cache/model-metadata/` without credentials and reused on
+restart, including after an interrupted download. Upstream `main` changes do
+not silently replace the cached version. Missing access or integrity metadata
+stops startup; it never falls back to an unverified download.
 
 The new workflow is copied once to:
 
@@ -130,10 +145,10 @@ Only `/tmp/comfy` is intentionally ephemeral.
 
 | Profile | Files | Size | Contents |
 |---|---:|---:|---|
-| `dasiwa` | 10 | 48.32 GB | all real DaSiWa V5.1 model references |
+| `dasiwa` | 12 | 48.32 GB + user LoRAs | all real DaSiWa V5.1 model references plus two user LoRAs |
 | `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
-| `workflow` | 12 | 60.39 GB | `public` plus the three optional concept LoRAs |
-| `all` | 20 | 116.45 GB | both workflows, including bypassed alternate loaders and LoRAs |
+| `workflow` | 14 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and two user LoRAs |
+| `all` | 22 | 116.45 GB + user LoRAs | both workflows, including bypassed alternate loaders and LoRAs |
 
 The concept LoRAs referenced by V6.1 are included in `workflow`, even though their
 slots are initially off, so enabling them does not require another URL. `all`

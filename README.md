@@ -3,13 +3,14 @@
 RunPod image for the unmodified user-supplied
 `DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json` workflow.
 The existing `MrXin LTX 2.3 I2V EROS V6.1.json` is retained unchanged.
+`DaSiWa RIFE SPAN.json` is a separate comparison workflow with pixel-domain upscaling.
 
 The image:
 
 1. builds ComfyUI `v0.43.0` at a fixed commit on PyTorch 2.10.0 / CUDA 13.0;
 2. installs 18 custom-node repositories at full commit SHAs;
 3. downloads the selected model profile into `/workspace` storage;
-4. installs both original workflows once without overwriting later user edits;
+4. installs all three workflows once without overwriting later user edits;
 5. runs doctor checks, then starts ComfyUI on `0.0.0.0:8188`.
 
 Models are not baked into the Docker image. Downloads use parallel, resumable
@@ -40,6 +41,50 @@ Their selected model files are included, but those switches remain unchanged.
 `placeholder.gguf` is an intentionally bypassed author placeholder, not a model:
 select real GGUF files before switching to that branch. Optional watermark images
 are user inputs, not downloaded assets. Upload your own image in LTX Director.
+
+## DaSiWa RIFE SPAN
+
+Open **DaSiWa RIFE SPAN** to compare against the untouched OmniForge workflow:
+
+```text
+LTX Director -> first pass (8 steps, CFG 1, scale 0.5)
+-> remove image-guide latent frames -> VAE Decode
+-> RIFE 4.26 (2x frames) -> 2x NomosUni SPAN (2x width/height) -> MP4
+```
+
+There is no latent upscaler, second/third diffusion pass, RTX processing,
+watermark or mosaic in this derivative. Models, LoRA slots, prompts, seed,
+Director timeline and the original 900p resolution budget are retained.
+The preview uses TAE without loading a latent upscaler. Both full and tiled VAE
+decode receive the guide-cropped first-pass latent, not appended guide frames.
+The original workflow's first pass runs at half the Director's resolved dimensions;
+SPAN doubles those completed frames. The resolution preset is therefore still
+the target-size budget, not the first-pass size. Aspect-ratio fitting and Div32
+rounding can change the exact dimensions. For example, 512x704 completed frames
+become 1024x1408; selecting 512x704 as the Director's target is not the same thing.
+
+RIFE runs **before** SPAN at the smaller resolution. Its multiplier is 2 and the
+save FPS is wired to `Director FPS * 2` (24 -> 48), so interpolation does not create
+slow motion. Audio comes from the first pass without time stretching. Native RIFE
+preserves endpoints: N frames become `(N - 1) * 2 + 1`, e.g. 121 -> 241. The endpoint
+time is unchanged; file duration differs by half one original frame interval.
+Generated files use the `rife_span/` prefix. Use the same input, fixed seed, prompts,
+duration and final resolution for A/B tests. This is not a proven quality upgrade:
+latent refinement can synthesize details, while SPAN can sharpen or change texture,
+and frame-wise upscaling can introduce shimmer. GPU speed/quality need a real A/B run.
+
+The extra model is [2x NomosUni SPAN multijpg](https://huggingface.co/Phips/2xNomosUni_span_multijpg)
+by Philip Hofmann / Helaman ([CC-BY-4.0 model card](https://openmodeldb.info/models/2x-NomosUni-span-multijpg)).
+It adds 4,461,056 bytes to the existing parallel downloader with a pinned revision,
+exact size and SHA-256. It uses ComfyUI's existing model-managed, tiled upscale node;
+no additional custom-node pack or environment variable is needed. The native IMAGE
+batch still occupies RAM and some GPU memory; this is not a streaming-video pipeline.
+
+`scripts/prepare_rife_span.py` reproducibly generates only this derivative. Tests
+check both ends of every link, subgraph interfaces, guide removal, pass count,
+RIFE/SPAN order, FPS/audio wiring, model coverage and non-overlapping layouts.
+Container CI additionally executes RIFE and SPAN with their real verified weights
+on a tiny synthetic batch and checks the encoded MP4 dimensions/frame count/FPS.
 
 ## RunPod template
 
@@ -97,7 +142,7 @@ are not validated by CPU CI. Leave `COMFY_ARGS` empty initially and use
 
 ## First start
 
-The default `dasiwa` profile downloads 12 files: about 48.32 GB of workflow models
+The default `dasiwa` profile downloads 13 files: about 48.32 GB of workflow models
 plus the two private user LoRAs. Their sizes are reported at startup.
 Gated/private-repository access is checked before starting large downloads.
 ComfyUI starts only after downloads and doctor checks pass,
@@ -118,10 +163,11 @@ restart, including after an interrupted download. Upstream `main` changes do
 not silently replace the cached version. Missing access or integrity metadata
 stops startup; it never falls back to an unverified download.
 
-The new workflow is copied once to:
+The DaSiWa workflows are copied once to:
 
 ```text
 /workspace/user/default/workflows/DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json
+/workspace/user/default/workflows/DaSiWa RIFE SPAN.json
 ```
 
 User edits are never overwritten. If the same volume still contains the old V2
@@ -145,10 +191,10 @@ Only `/tmp/comfy` is intentionally ephemeral.
 
 | Profile | Files | Size | Contents |
 |---|---:|---:|---|
-| `dasiwa` | 12 | 48.32 GB + user LoRAs | all real DaSiWa V5.1 model references plus two user LoRAs |
+| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, RIFE SPAN derivative and two user LoRAs |
 | `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
 | `workflow` | 14 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and two user LoRAs |
-| `all` | 22 | 116.45 GB + user LoRAs | both workflows, including bypassed alternate loaders and LoRAs |
+| `all` | 23 | 116.45 GB + user LoRAs | all workflows, including bypassed alternate loaders and LoRAs |
 
 The concept LoRAs referenced by V6.1 are included in `workflow`, even though their
 slots are initially off, so enabling them does not require another URL. `all`

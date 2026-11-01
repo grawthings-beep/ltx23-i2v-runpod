@@ -61,7 +61,8 @@ def main():
         assert not missing_nodes, f"unknown node types: {sorted(missing_nodes)}"
         missing_models = model_references(workflow) - model_names
         assert not missing_models, f"missing exact model selector paths: {sorted(missing_models)}"
-        print(f"OK: {entry['filename']} ({entry['node_count']} nodes; original SHA256 preserved)")
+        provenance = "derived SHA256 verified" if entry.get("derived_from") else "original SHA256 preserved"
+        print(f"OK: {entry['filename']} ({entry['node_count']} nodes; {provenance})")
     runtime_metadata = sum(bool(m.get("resolve_hf_metadata")) for m in models["models"])
     print(f"OK: {len(nodes['nodes'])} pinned node packs, {len(ids)} model artifacts "
           f"({runtime_metadata} private LoRAs verified at runtime)")

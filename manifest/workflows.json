@@ -30,6 +30,14 @@
       "strip_trailing_newlines": true,
       "node_count": 154,
       "empty_link_placeholders": 0
+    },
+    {
+      "filename": "DaSiWa RIFE SPAN.json",
+      "profile": "dasiwa",
+      "derived_from": "DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json",
+      "sha256": "f301c5c50df8e06fca7b67279c740406052e4151e01303ebb2ea5523531ed886",
+      "node_count": 67,
+      "empty_link_placeholders": 0
     }
   ]
 }

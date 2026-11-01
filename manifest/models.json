@@ -254,6 +254,18 @@
       "exact_bytes": 22674688
     },
     {
+      "id": "nomosuni-span-2x",
+      "filename": "2xNomosUni_span_multijpg.safetensors",
+      "relative_path": "models/upscale_models/2xNomosUni_span_multijpg.safetensors",
+      "url": "https://huggingface.co/Phips/2xNomosUni_span_multijpg/resolve/ed6111c4cabdaf42b75e6535600d5370cce9e4e2/2xNomosUni_span_multijpg.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "all"],
+      "auth": "HF_TOKEN",
+      "sha256": "bee2a9c082f2b8f6e7f5db504b36593c24a1a959511f587114c399ca58b9c92c",
+      "exact_bytes": 4461056,
+      "notes": "2x NomosUni SPAN multijpg by Philip Hofmann / Helaman, CC-BY-4.0. Used after RIFE in the separate DaSiWa RIFE SPAN workflow. https://openmodeldb.info/models/2x-NomosUni-span-multijpg"
+    },
+    {
       "id": "uwgm-foot-lora",
       "filename": "FOOT.safetensors",
       "relative_path": "models/loras/LTX2/User/FOOT.safetensors",

@@ -29,13 +29,13 @@ class WorkflowTests(unittest.TestCase):
         names = {"/".join(p.split("/")[2:]) for m in models
                  for p in [m["relative_path"], *m.get("aliases", [])]}
         self.assertFalse(model_references(self.workflow) - names)
-        self.assertEqual(len(models), 12)
+        self.assertEqual(len(models), 13)
         self.assertNotIn("ltx2310eros-v1-fp8", {m["id"] for m in models})
 
     def test_original_profiles_and_loras_remain(self):
         self.assertEqual(len(download_models.selected_models(self.manifest, "public")), 9)
         self.assertEqual(len(download_models.selected_models(self.manifest, "workflow")), 14)
-        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 22)
+        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 23)
 
     def test_user_loras_are_downloaded_without_enabling_workflow_slots(self):
         expected = {"FOOT.safetensors", "LTX2.3_reasoning_I2V_V3.safetensors"}

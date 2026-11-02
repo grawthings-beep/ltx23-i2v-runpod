@@ -4,13 +4,14 @@ RunPod image for the unmodified user-supplied
 `DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json` workflow.
 The existing `MrXin LTX 2.3 I2V EROS V6.1.json` is retained unchanged.
 `DaSiWa RIFE SPAN.json` is a separate comparison workflow with pixel-domain upscaling.
+`DaSiWa RIFE SPAN Refine.json` adds low-resolution video/audio refinement for comparison.
 
 The image:
 
 1. builds ComfyUI `v0.43.0` at a fixed commit on PyTorch 2.10.0 / CUDA 13.0;
 2. installs 18 custom-node repositories at full commit SHAs;
 3. downloads the selected model profile into `/workspace` storage;
-4. installs all three workflows once without overwriting later user edits;
+4. installs all four workflows once without overwriting later user edits;
 5. runs doctor checks, then starts ComfyUI on `0.0.0.0:8188`.
 
 Models are not baked into the Docker image. Downloads use parallel, resumable
@@ -80,11 +81,42 @@ exact size and SHA-256. It uses ComfyUI's existing model-managed, tiled upscale 
 no additional custom-node pack or environment variable is needed. The native IMAGE
 batch still occupies RAM and some GPU memory; this is not a streaming-video pipeline.
 
-`scripts/prepare_rife_span.py` reproducibly generates only this derivative. Tests
+### RIFE SPAN Refine comparison
+
+Open **DaSiWa RIFE SPAN Refine** to restore the original second/third video-and-audio
+sampling passes without restoring latent spatial upscaling:
+
+```text
+LTX Director -> first pass (8 steps, scale 0.5)
+-> remove guides -> second pass (4 steps, denoise 0.4, same resolution)
+-> remove guides -> third pass (2 steps, denoise 0.2, same resolution)
+-> remove guides -> final-pass video/audio decode
+-> RIFE 2x -> NomosUni SPAN 2x -> MP4 with final-pass audio
+```
+
+All passes retain CFG 1 and the original linear-quadratic scheduler settings.
+Each refinement pass receives the preceding pass's cropped video latent and audio
+latent together. Director guide metadata is removed after every pass, before
+re-guiding or decoding. Second/third guide scale is 1.0: there is no latent
+upscaler or high-resolution diffusion. RIFE, SPAN, doubled save FPS and model/LoRA
+selectors are the same as the fast version. Files use `rife_span_refine/`.
+
+This experiment addresses the loss of later audio refinement, but that loss has
+not been established as the cause of reported audio distortion. It is not a
+guaranteed audio fix. It adds six low-resolution sampling steps relative to the
+fast version; GPU runtime and output quality must be compared on the Pod. Use
+the same fixed seed, image, prompts, LoRAs, duration and resolution in both files.
+The fast version and both original workflows remain byte-for-byte unchanged.
+There are no additional model downloads, node packs or environment variables.
+
+`scripts/prepare_rife_span.py` reproducibly generates only the two derivatives. Tests
 check both ends of every link, subgraph interfaces, guide removal, pass count,
 RIFE/SPAN order, FPS/audio wiring, model coverage and non-overlapping layouts.
 Container CI additionally executes RIFE and SPAN with their real verified weights
 on a tiny synthetic batch and checks the encoded MP4 dimensions/frame count/FPS.
+The Refine post-processing test includes a synthetic stereo tone and verifies AAC
+duration, pitch, channel order, level, distortion and absence of clipping. This
+tests encoding, not the quality of LTX-generated sound or GPU refinement.
 
 ## RunPod template
 
@@ -168,6 +200,7 @@ The DaSiWa workflows are copied once to:
 ```text
 /workspace/user/default/workflows/DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json
 /workspace/user/default/workflows/DaSiWa RIFE SPAN.json
+/workspace/user/default/workflows/DaSiWa RIFE SPAN Refine.json
 ```
 
 User edits are never overwritten. If the same volume still contains the old V2
@@ -191,7 +224,7 @@ Only `/tmp/comfy` is intentionally ephemeral.
 
 | Profile | Files | Size | Contents |
 |---|---:|---:|---|
-| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, RIFE SPAN derivative and two user LoRAs |
+| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, both RIFE SPAN derivatives and two user LoRAs |
 | `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
 | `workflow` | 14 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and two user LoRAs |
 | `all` | 23 | 116.45 GB + user LoRAs | all workflows, including bypassed alternate loaders and LoRAs |
@@ -228,7 +261,7 @@ SKIP_MODEL_DOWNLOAD=1 docker compose up --build
 
 Pushes and pull requests run workflow/hash/link/model-path tests. Image builds
 launch the real entrypoint in a disposable CPU container and check `/object_info`
-for every CPU-loadable backend type in both workflows before publishing. The
+for every CPU-loadable backend type in all workflows before publishing. The
 legacy GPU-only `RTXVideoSuperResolution` requires host `libcuda.so.1`, so CPU CI
 audits its bundled SDK libraries and their dependencies instead of pretending to
 execute it. Easy-Use Get/Set and DaSiWa Label are frontend nodes, not missing

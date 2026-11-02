@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Derive a first-pass/RIFE/SPAN workflow without rewriting either original."""
+"""Derive RIFE/SPAN comparison workflows without rewriting the originals."""
 
 import copy
 import hashlib
@@ -10,6 +10,7 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = "DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json"
 OUTPUT = "DaSiWa RIFE SPAN.json"
+REFINED_OUTPUT = "DaSiWa RIFE SPAN Refine.json"
 SOURCE_SHA256 = "d826b97f4076025b3b6b6c5f8ac2e2f61f64f5ae5dcd359a2a12a9c5f1356841"
 SPAN = "2xNomosUni_span_multijpg.safetensors"
 LINK_KEYS = ("id", "origin_id", "origin_slot", "target_id", "target_slot", "type")
@@ -141,7 +142,8 @@ def arrange_subgraph(graph):
             p["pos"] = [px + (326 if ports == "inputs" else 24), 164 + i * 24]
 
 
-def build_workflow(source):
+def build_workflow(source, *, refine=False):
+    output_name = REFINED_OUTPUT if refine else OUTPUT
     w = copy.deepcopy(source)
     subgraphs = {g["name"]: g for g in w["definitions"]["subgraphs"]}
     model, render, post = (subgraphs[name] for name in ("Model Loader", "Rendering", "Post Processing"))
@@ -154,13 +156,23 @@ def build_workflow(source):
     remove_ports(w, model, input_slots=(4, 14), output_slots=(3,))
     model_parent["widgets_values"].pop(4)
 
-    # Crop the first pass's appended image guides before either VAE decode path.
+    # Every pass consumes cropped video and the preceding pass's audio latent.
     links = edges(render)
+    if refine:
+        third_crop = next(n for n in render["nodes"] if n["id"] == 3654)
+        third_crop["type"] = "LTXDirectorCropGuides"
+        third_crop["properties"] = copy.deepcopy(next(n for n in render["nodes"] if n["id"] == 3632)["properties"])
+        rewires = {
+            (3651, 3): [3632, 2],  # Skip the spatial upscaler; keep first-pass H/W.
+            (3663, 0): [3647, 0], (3663, 1): [3647, 1], (3663, 3): [3647, 2],
+            (3657, 1): [3648, 1],
+            (3628, 0): [3654, 2], (3631, 1): [3654, 2], (3629, 0): [3653, 1],
+        }
+    else:
+        rewires = {(3628, 0): [3632, 2], (3631, 1): [3632, 2], (3629, 0): [3646, 1]}
     for link in links:
-        if (link[3], link[4]) in ((3628, 0), (3631, 1)):
-            link[1:3] = [3632, 2]
-        elif (link[3], link[4]) == (3629, 0):
-            link[1:3] = [3646, 1]
+        if (link[3], link[4]) in rewires:
+            link[1:3] = rewires[link[3], link[4]]
     keep = {3627, 3629, 3706}
     while True:
         ancestors = {link[1] for link in links if link[3] in keep and link[1] != -10}
@@ -171,9 +183,17 @@ def build_workflow(source):
     set_edges(render, links)
     remove_ports(w, render, input_slots=(7, 15, 16))
     render_parent["widgets_values"] = [True, False]
-    render["name"] = "First Pass + Decode"
-    render_parent["title"] = "First Pass + Decode (no latent upscale)"
+    render["name"] = "Refine + Decode" if refine else "First Pass + Decode"
+    render_parent["title"] = "Render 8 + 4 + 2 (no latent upscale)" if refine else "First Pass + Decode (no latent upscale)"
     render_parent["size"] = [440, 370]
+    if refine:
+        titles = {3650: "Pass 1 / base video + audio", 3649: "Pass 2 / low-res video + audio",
+                  3656: "Pass 3 / low-res video + audio", 3632: "Remove pass 1 image guides",
+                  3647: "Remove pass 2 image guides", 3654: "Remove pass 3 image guides",
+                  3629: "Decode final-pass audio"}
+        for node in render["nodes"]:
+            if node["id"] in titles:
+                node["title"] = titles[node["id"]]
 
     # Reuse installed Comfy core nodes, with RIFE before the pixel-domain upscaler.
     post_nodes = {n["id"]: n for n in post["nodes"]}
@@ -212,12 +232,26 @@ def build_workflow(source):
                                "Resolution preset is the target-size budget, not the first-pass size.\n\n"
                                "For A/B tests, match image, prompts, seed, duration and output size."]}
     w["nodes"].append(note)
+    if refine:
+        note["title"] = "DaSiWa RIFE SPAN Refine / comparison"
+        note["widgets_values"] = [
+            "Low-resolution video + audio: 8 + 4 + 2 steps, CFG 1.\n\n"
+            "Pass 1 scale 0.5. Pass 2/3 scale 1.0; no latent upscale.\n\n"
+            "Final-pass decode -> RIFE 2x -> NomosUni SPAN 2x -> MP4.\n\n"
+            "Final-pass audio: no time stretching; FPS doubled. No mosaic.\n\n"
+            "This is an experiment, not a verified audio-quality fix.\n\n"
+            "Compare with the original RIFE SPAN using the same fixed seed,\n"
+            "image, prompts, LoRAs, duration and resolution.\n\n"
+            "Slower than first-pass-only; GPU quality/speed need testing."
+        ]
     set_edges(w, links)
     save = next(n for n in w["nodes"] if n["id"] == 3710)
     save["widgets_values_named"].update(filename_prefix="rife_span/%date:yyyy-MM-dd%/%date:hhmmss%",
                                         container="MP4", free_memory_if_needed=False)
+    if refine:
+        save["widgets_values_named"]["filename_prefix"] = "rife_span_refine/%date:yyyy-MM-dd%/%date:hhmmss%"
     save["widgets_values"] = list(save["widgets_values_named"].values())
-    save["title"] = "Save RIFE SPAN video"
+    save["title"] = "Save RIFE SPAN Refine video" if refine else "Save RIFE SPAN video"
 
     columns = [
         ("01 Models", [(3319, 80, 160, 660, 650), (4000, 80, 930, 660, 340)]),
@@ -233,13 +267,15 @@ def build_workflow(source):
     w["groups"] = []
     nodes = {n["id"]: n for n in w["nodes"]}
     for index, (title, specs) in enumerate(columns, 1):
+        if refine and index == 4:
+            title = "04 Render 8 + 4 + 2"
         for ident, x, y, width, height in specs:
             nodes[ident]["pos"], nodes[ident]["size"] = [x, y], [width, height]
         group(w, title, [nodes[s[0]] for s in specs], index)
 
     for g in w["definitions"]["subgraphs"]:
         old = g["id"]
-        g["id"] = str(uuid.uuid5(uuid.NAMESPACE_URL, OUTPUT + "/" + old))
+        g["id"] = str(uuid.uuid5(uuid.NAMESPACE_URL, output_name + "/" + old))
         next(n for n in w["nodes"] if n["type"] == old)["type"] = g["id"]
         set_edges(g, edges(g))
         arrange_subgraph(g)
@@ -256,7 +292,7 @@ def build_workflow(source):
         if "state" in g:
             g["state"] = {"lastGroupId": len(g["groups"]), "lastNodeId": 4000,
                           "lastLinkId": next_link - 1, "lastRerouteId": 0}
-    w["id"] = str(uuid.uuid5(uuid.NAMESPACE_URL, OUTPUT))
+    w["id"] = str(uuid.uuid5(uuid.NAMESPACE_URL, output_name))
     w["last_node_id"], w["last_link_id"] = 4000, next_link - 1
     w["extra"]["ds"] = {"scale": 0.6, "offset": [0, 0]}
     w["extra"]["rife_span_source_sha256"] = SOURCE_SHA256
@@ -266,11 +302,12 @@ def build_workflow(source):
 def main():
     raw = (ROOT / "workflows" / SOURCE).read_bytes()
     assert hashlib.sha256(raw).hexdigest() == SOURCE_SHA256, "Source changed; review before regenerating"
-    workflow = build_workflow(json.loads(raw))
-    output = (json.dumps(workflow, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
-    (ROOT / "workflows" / OUTPUT).write_bytes(output)
-    print(f"{OUTPUT}: sha256={hashlib.sha256(output).hexdigest()}, "
-          f"nodes={sum(len(g['nodes']) for g in [workflow, *workflow['definitions']['subgraphs']])}")
+    for refine, filename in ((False, OUTPUT), (True, REFINED_OUTPUT)):
+        workflow = build_workflow(json.loads(raw), refine=refine)
+        output = (json.dumps(workflow, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        (ROOT / "workflows" / filename).write_bytes(output)
+        print(f"{filename}: sha256={hashlib.sha256(output).hexdigest()}, "
+              f"nodes={sum(len(g['nodes']) for g in [workflow, *workflow['definitions']['subgraphs']])}")
 
 
 if __name__ == "__main__":

@@ -7,17 +7,21 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from scripts.prepare_rife_span import OUTPUT, SOURCE, SOURCE_SHA256, SPAN, build_workflow, edges
+from scripts.prepare_rife_span import OUTPUT, REFINED_OUTPUT, SOURCE, SOURCE_SHA256, SPAN, build_workflow, edges
 from scripts.workflow_contract import all_nodes, graphs, model_references, validate_links
 
 
 class RifeSpanTests(unittest.TestCase):
+    refine = False
+    filename = OUTPUT
+
     @classmethod
     def setUpClass(cls):
         cls.source = json.loads((ROOT / "workflows" / SOURCE).read_bytes())
-        cls.workflow = json.loads((ROOT / "workflows" / OUTPUT).read_bytes())
+        cls.workflow = json.loads((ROOT / "workflows" / cls.filename).read_bytes())
         cls.nodes = {n["id"]: n for n in all_nodes(cls.workflow)}
-        cls.render = next(g for g in graphs(cls.workflow) if g.get("name") == "First Pass + Decode")
+        parent = cls.nodes[3676]
+        cls.render = next(g for g in graphs(cls.workflow) if g.get("id") == parent["type"])
 
     def upstream(self, graph, node_id, input_name):
         node = next(n for n in graph["nodes"] if n["id"] == node_id)
@@ -27,14 +31,14 @@ class RifeSpanTests(unittest.TestCase):
 
     def test_deterministic_derivative_and_original_untouched(self):
         self.assertEqual(hashlib.sha256((ROOT / "workflows" / SOURCE).read_bytes()).hexdigest(), SOURCE_SHA256)
-        self.assertEqual(build_workflow(self.source), self.workflow)
+        self.assertEqual(build_workflow(self.source, refine=self.refine), self.workflow)
         original_ids = {g["id"] for g in graphs(self.source)}
         self.assertFalse(original_ids & {g["id"] for g in graphs(self.workflow)})
 
-    def test_only_first_pass_and_no_latent_upscale_or_mosaic(self):
+    def test_pass_count_and_no_latent_upscale_or_mosaic(self):
         types = [n["type"] for n in self.nodes.values()]
-        self.assertEqual(types.count("SamplerCustomAdvanced"), 1)
-        self.assertEqual(types.count("LTXDirectorGuide"), 1)
+        self.assertEqual(types.count("SamplerCustomAdvanced"), 3 if self.refine else 1)
+        self.assertEqual(types.count("LTXDirectorGuide"), 3 if self.refine else 1)
         self.assertNotIn("LTXVLatentUpsampler", types)
         self.assertNotIn("LatentUpscaleModelLoader", types)
         self.assertFalse(any("mosaic" in t.lower() for t in types))
@@ -45,12 +49,17 @@ class RifeSpanTests(unittest.TestCase):
         self.assertIsNone(next(p for p in preview["inputs"] if p["name"] == "latent_upscale_model")["link"])
 
     def test_guides_removed_before_full_and_tiled_decode(self):
-        self.assertEqual(self.upstream(self.render, 3632, "latent"), [3646, 0])
-        self.assertEqual(self.upstream(self.render, 3632, "positive"), [3652, 0])
-        self.assertEqual(self.upstream(self.render, 3632, "negative"), [3652, 1])
-        self.assertEqual(self.upstream(self.render, 3628, "samples"), [3632, 2])
-        self.assertEqual(self.upstream(self.render, 3631, "latents"), [3632, 2])
-        self.assertEqual(self.upstream(self.render, 3629, "samples"), [3646, 1])
+        passes = [(3632, 3646, 3652)]
+        if self.refine:
+            passes += [(3647, 3648, 3651), (3654, 3653, 3663)]
+        for crop, separate, guide in passes:
+            self.assertEqual(self.nodes[crop]["type"], "LTXDirectorCropGuides")
+            self.assertEqual(self.upstream(self.render, crop, "latent"), [separate, 0])
+            self.assertEqual(self.upstream(self.render, crop, "positive"), [guide, 0])
+            self.assertEqual(self.upstream(self.render, crop, "negative"), [guide, 1])
+        self.assertEqual(self.upstream(self.render, 3628, "samples"), [passes[-1][0], 2])
+        self.assertEqual(self.upstream(self.render, 3631, "latents"), [passes[-1][0], 2])
+        self.assertEqual(self.upstream(self.render, 3629, "samples"), [passes[-1][1], 1])
 
     def test_rife_then_span_then_encode_once_with_doubled_fps(self):
         w = self.workflow
@@ -125,6 +134,41 @@ class RifeSpanTests(unittest.TestCase):
                 width, height = n["size"]
                 self.assertEqual(sum(gx <= x and gy + 30 <= y - 30 and gx + gw >= x + width and gy + gh >= y + height
                                      for gx, gy, gw, gh in (g["bounding"] for g in graph["groups"])), 1, n["id"])
+
+
+class RifeSpanRefineTests(RifeSpanTests):
+    refine = True
+    filename = REFINED_OUTPUT
+
+    def test_refinement_uses_original_settings_without_spatial_scaling(self):
+        original = {n["id"]: n for n in all_nodes(self.source)}
+        for ident in (3635, 3658, 3645, 3655, 3651, 3663):
+            self.assertEqual(self.nodes[ident]["widgets_values"], original[ident]["widgets_values"])
+        self.assertEqual(self.nodes[3635]["widgets_values"], ["linear_quadratic", 4, 0.4])
+        self.assertEqual(self.nodes[3658]["widgets_values"], ["linear_quadratic", 2, 0.2])
+        for ident in (3651, 3663):
+            self.assertEqual(self.nodes[ident]["widgets_values_named"]["scale_by"], 1)
+        self.assertFalse(any(n["type"] in ("LatentUpscale", "LatentUpscaleBy", "LTXVCropGuides") for n in self.nodes.values()))
+
+    def test_video_and_audio_stay_paired_through_all_passes(self):
+        for guide, crop, concat, separate, sampler in (
+            (3651, 3632, 3633, 3646, 3649), (3663, 3647, 3657, 3648, 3656)
+        ):
+            for name, slot in (("positive", 0), ("negative", 1), ("latent", 2)):
+                self.assertEqual(self.upstream(self.render, guide, name), [crop, slot])
+            self.assertEqual(self.upstream(self.render, concat, "video_latent"), [guide, 2])
+            self.assertEqual(self.upstream(self.render, concat, "audio_latent"), [separate, 1])
+            self.assertEqual(self.upstream(self.render, sampler, "latent_image"), [concat, 0])
+        self.assertEqual(self.upstream(self.render, 3648, "av_latent"), [3649, 0])
+        self.assertEqual(self.upstream(self.render, 3653, "av_latent"), [3656, 0])
+        self.assertFalse(any(n["type"] == "PrimitiveBoolean" and n["id"] in (3683, 3684) for n in self.nodes.values()))
+
+    def test_fast_variant_is_unchanged_and_refine_has_separate_identity_and_output(self):
+        raw = (ROOT / "workflows" / OUTPUT).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), "f301c5c50df8e06fca7b67279c740406052e4151e01303ebb2ea5523531ed886")
+        fast_ids = {g["id"] for g in graphs(json.loads(raw))}
+        self.assertFalse(fast_ids & {g["id"] for g in graphs(self.workflow)})
+        self.assertTrue(self.nodes[3710]["widgets_values_named"]["filename_prefix"].startswith("rife_span_refine/"))
 
 
 if __name__ == "__main__":

@@ -38,6 +38,14 @@
       "sha256": "f301c5c50df8e06fca7b67279c740406052e4151e01303ebb2ea5523531ed886",
       "node_count": 67,
       "empty_link_placeholders": 0
+    },
+    {
+      "filename": "DaSiWa RIFE SPAN Refine.json",
+      "profile": "dasiwa",
+      "derived_from": "DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json",
+      "sha256": "33c3b399ff42022e9f3236ab68a178f80ba124f6f8f4f6575bf382717888ff81",
+      "node_count": 81,
+      "empty_link_placeholders": 0
     }
   ]
 }

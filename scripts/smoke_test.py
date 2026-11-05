@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the real entrypoint and tiny RIFE/SPAN inference without LTX weights/GPU."""
+"""Exercise entrypoint, last-frame preview and RIFE/SPAN without LTX weights/GPU."""
 
 import json
 import math
@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import wave
 
@@ -24,6 +25,49 @@ def request_json(path, data=None):
             return json.load(response)
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"{path}: {exc.read().decode()}") from exc
+
+
+def run_prompt(prompt):
+    job = request_json("/prompt", {"prompt": prompt})
+    assert not job.get("node_errors"), job
+    prompt_id = job["prompt_id"]
+    deadline = time.monotonic() + 180
+    while time.monotonic() < deadline:
+        history = request_json("/history/" + prompt_id).get(prompt_id)
+        if history:
+            assert history["status"]["status_str"] == "success", history
+            return history
+        time.sleep(1)
+    raise RuntimeError(f"CPU smoke prompt {prompt_id} timed out")
+
+
+def check_last_frame_preview(bootstrap):
+    from io import BytesIO
+    from PIL import Image
+
+    workflow = json.loads((bootstrap / "workflows/DaSiWa Last Frame.json").read_bytes())
+    extract = next(n for n in workflow["nodes"] if n["type"] == "ImageFromBatch")
+    preview = next(n for n in workflow["nodes"] if n["type"] == "PreviewImage" and n.get("title") == "Last Frame")
+    for count, expected in ((1, (255, 0, 0)), (3, (0, 0, 255))):
+        prompt = {str(i): {"class_type": "EmptyImage", "inputs": {
+            "width": 64, "height": 64, "batch_size": 1, "color": color}}
+            for i, color in enumerate((0xFF0000, 0x00FF00, 0x0000FF)[:count], 1)}
+        if count > 1:
+            prompt["4"] = {"class_type": "ImageBatch", "inputs": {"image1": ["1", 0], "image2": ["2", 0]}}
+            prompt["5"] = {"class_type": "ImageBatch", "inputs": {"image1": ["4", 0], "image2": ["3", 0]}}
+        prompt[str(extract["id"])] = {"class_type": extract["type"], "inputs": {
+            **extract["widgets_values_named"], "image": ["5" if count > 1 else "1", 0]}}
+        prompt[str(preview["id"])] = {"class_type": preview["type"], "inputs": {"images": [str(extract["id"]), 0]}}
+        history = run_prompt(prompt)
+        images = history["outputs"][str(preview["id"])]["images"]
+        assert len(images) == 1 and images[0]["type"] == "temp", images
+        query = urllib.parse.urlencode({k: images[0][k] for k in ("filename", "subfolder", "type")})
+        with urllib.request.urlopen("http://127.0.0.1:8188/view?" + query, timeout=30) as response:
+            assert response.status == 200
+            with Image.open(BytesIO(response.read())) as image:
+                assert image.format == "PNG" and image.size == (64, 64)
+                assert image.convert("RGB").getextrema() == tuple((c, c) for c in expected)
+        print(f"PASS: {count}-frame batch -> one Last Frame preview; correct final pixels, UI image response and browser download URL")
 
 
 def download_postprocess_models(bootstrap, data_root, env):
@@ -111,18 +155,7 @@ def check_postprocess(bootstrap, data_root, *, refine=False):
         write_test_audio(tone_path)
         prompt["2"] = {"class_type": "LoadAudio", "inputs": {"audio": tone_path.name}}
         prompt["3710"]["inputs"]["audio"] = ["2", 0]
-    job = request_json("/prompt", {"prompt": prompt})
-    assert not job.get("node_errors"), job
-    prompt_id = job["prompt_id"]
-    deadline = time.monotonic() + 180
-    while time.monotonic() < deadline:
-        history = request_json("/history/" + prompt_id).get(prompt_id)
-        if history:
-            assert history["status"]["status_str"] == "success", history
-            break
-        time.sleep(1)
-    else:
-        raise RuntimeError("RIFE/SPAN CPU smoke timed out")
+    run_prompt(prompt)
     videos = list((data_root / "output/smoke").glob(prefix + "_*.mp4"))
     assert len(videos) == 1, videos
     probe = json.loads(subprocess.check_output([
@@ -165,6 +198,7 @@ def main():
                 for source in (bootstrap / "workflows").glob("*.json"):
                     installed = Path(directory) / "user/default/workflows" / source.name
                     assert installed.read_bytes() == source.read_bytes(), source.name
+                check_last_frame_preview(bootstrap)
                 check_postprocess(bootstrap, Path(directory))
                 check_postprocess(bootstrap, Path(directory), refine=True)
                 print("PASS: real entrypoint, HTTP API, CPU-loadable workflow node schemas, exact workflow installation; GPU-only RTX checked for bundled SDK dependencies")

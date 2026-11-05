@@ -6,7 +6,7 @@
     "AudioAdjustVolume", "BasicScheduler", "CFGGuider", "CLIPTextEncode",
     "ColorTransfer", "ComfyMathExpression", "ComfySwitchNode", "ConditioningZeroOut",
     "DualCLIPLoader", "EmptyImage", "EmptyLTXVLatentVideo", "FrameInterpolate",
-    "FrameInterpolationModelLoader", "GetImageSize", "ImageScaleBy",
+    "FrameInterpolationModelLoader", "GetImageSize", "ImageFromBatch", "ImageScaleBy",
     "ImageUpscaleWithModel", "KSamplerSelect", "LTXVAudioVAEDecode",
     "LTXVAudioVAEEncode", "LTXVConcatAVLatent", "LTXVConditioning", "LTXVCropGuides",
     "LTXVEmptyLatentAudio", "LTXVLatentUpsampler", "LTXVPreprocess", "LTXVScheduler",
@@ -21,6 +21,14 @@
       "profile": "dasiwa",
       "sha256": "d826b97f4076025b3b6b6c5f8ac2e2f61f64f5ae5dcd359a2a12a9c5f1356841",
       "node_count": 116,
+      "empty_link_placeholders": 1
+    },
+    {
+      "filename": "DaSiWa Last Frame.json",
+      "profile": "dasiwa",
+      "derived_from": "DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json",
+      "sha256": "e87d75a0766070a94e427b0a3a8d03a045b96f24670409b84558e017599928c6",
+      "node_count": 118,
       "empty_link_placeholders": 1
     },
     {

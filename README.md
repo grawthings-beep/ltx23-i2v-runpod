@@ -3,6 +3,7 @@
 RunPod image for the unmodified user-supplied
 `DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json` workflow.
 The existing `MrXin LTX 2.3 I2V EROS V6.1.json` is retained unchanged.
+`DaSiWa Last Frame.json` adds a dedicated final-frame preview to the original DaSiWa graph.
 `DaSiWa RIFE SPAN.json` is a separate comparison workflow with pixel-domain upscaling.
 `DaSiWa RIFE SPAN Refine.json` adds low-resolution video/audio refinement for comparison.
 
@@ -11,7 +12,7 @@ The image:
 1. builds ComfyUI `v0.43.0` at a fixed commit on PyTorch 2.10.0 / CUDA 13.0;
 2. installs 18 custom-node repositories at full commit SHAs;
 3. downloads the selected model profile into `/workspace` storage;
-4. installs all four workflows once without overwriting later user edits;
+4. installs all five workflows once without overwriting later user edits;
 5. runs doctor checks, then starts ComfyUI on `0.0.0.0:8188`.
 
 Models are not baked into the Docker image. Downloads use parallel, resumable
@@ -42,6 +43,37 @@ Their selected model files are included, but those switches remain unchanged.
 `placeholder.gguf` is an intentionally bypassed author placeholder, not a model:
 select real GGUF files before switching to that branch. Optional watermark images
 are user inputs, not downloaded assets. Upload your own image in LTX Director.
+
+## DaSiWa Last Frame
+
+Open **DaSiWa Last Frame** for the original OmniForge generation settings with a
+separate **Last Frame** preview node to the right of Video Output. No SPAN processing
+is added. Models, LoRAs, prompts, seed, resolution, audio, sampling, latent upscaling,
+post-processing switches and the video encoder are unchanged from the author file.
+
+```text
+Final IMAGE frames -> existing video encoder
+                   -> Get Image from Batch (-1, length 1) -> Last Frame (Preview Image)
+```
+
+Run the workflow and right-click the still image in **Last Frame** to save it to
+your computer. There is no need to browse the Pod output directory or enable
+`Save last frame` in the video encoder. The standard preview node uses a temporary
+PNG, so download it before discarding the Pod. This branch runs with generation;
+it does not extract an image from a previously saved MP4. Re-queuing may regenerate
+the video if the seed changes or upstream caches are no longer available.
+
+Only one frame is cloned for preview; `pass_frames` stays off and no extra model or
+custom node is installed. The original and the older RIFE/SPAN comparisons remain
+unchanged. This separate filename is installed even on a volume containing the old
+workflows, without overwriting user edits. An existing compatible Pod can import
+the JSON directly; no image or environment-variable change is required for that.
+
+`scripts/prepare_last_frame.py` reproduces this derivative. Tests verify that only
+the two preview nodes, their wiring/layout and graph identities differ from the
+original. Container CI executes the branch with one- and three-frame synthetic
+batches, checks the exact final-frame pixels and checks the UI image response and
+download URL. It does not inspect the user's generated video.
 
 ## DaSiWa RIFE SPAN
 
@@ -199,6 +231,7 @@ The DaSiWa workflows are copied once to:
 
 ```text
 /workspace/user/default/workflows/DasiwaLTX23WorkflowsI2VFLF2V_omniforgeCLTX23V51.json
+/workspace/user/default/workflows/DaSiWa Last Frame.json
 /workspace/user/default/workflows/DaSiWa RIFE SPAN.json
 /workspace/user/default/workflows/DaSiWa RIFE SPAN Refine.json
 ```
@@ -224,7 +257,7 @@ Only `/tmp/comfy` is intentionally ephemeral.
 
 | Profile | Files | Size | Contents |
 |---|---:|---:|---|
-| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, both RIFE SPAN derivatives and two user LoRAs |
+| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, Last Frame, both RIFE SPAN derivatives and two user LoRAs |
 | `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
 | `workflow` | 14 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and two user LoRAs |
 | `all` | 23 | 116.45 GB + user LoRAs | all workflows, including bypassed alternate loaders and LoRAs |

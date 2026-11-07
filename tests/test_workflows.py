@@ -29,22 +29,32 @@ class WorkflowTests(unittest.TestCase):
         names = {"/".join(p.split("/")[2:]) for m in models
                  for p in [m["relative_path"], *m.get("aliases", [])]}
         self.assertFalse(model_references(self.workflow) - names)
-        self.assertEqual(len(models), 13)
+        self.assertEqual(len(models), 15)
         self.assertNotIn("ltx2310eros-v1-fp8", {m["id"] for m in models})
 
     def test_original_profiles_and_loras_remain(self):
         self.assertEqual(len(download_models.selected_models(self.manifest, "public")), 9)
-        self.assertEqual(len(download_models.selected_models(self.manifest, "workflow")), 14)
-        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 23)
+        self.assertEqual(len(download_models.selected_models(self.manifest, "workflow")), 16)
+        self.assertEqual(len(download_models.selected_models(self.manifest, "all")), 25)
 
     def test_user_loras_are_downloaded_without_enabling_workflow_slots(self):
-        expected = {"FOOT.safetensors", "LTX2.3_reasoning_I2V_V3.safetensors"}
+        expected = {
+            "FOOT.safetensors": "uwgm/nikke-loras",
+            "LTX2.3_reasoning_I2V_V3.safetensors": "uwgm/nikke-loras",
+            "LTX2.3_CREAMPIE.safetensors": "uwgm/nikke-civitai-backup",
+            "TentacleMotion.safetensors": "uwgm/nikke-civitai-backup",
+        }
         private = [m for m in self.manifest["models"] if m.get("resolve_hf_metadata")]
-        self.assertEqual({m["filename"] for m in private}, expected)
+        self.assertEqual({m["filename"] for m in private}, set(expected))
         for model in private:
             self.assertEqual(set(model["profiles"]), {"dasiwa", "workflow", "all"})
             self.assertEqual(model["relative_path"], "models/loras/LTX2/User/" + model["filename"])
             self.assertEqual(model["auth"], "HF_TOKEN")
+            self.assertEqual(model["url"],
+                             f"https://huggingface.co/{expected[model['filename']]}/resolve/main/{model['filename']}")
+        for entry in self.catalog["workflows"]:
+            workflow = json.loads((ROOT / "workflows" / entry["filename"]).read_bytes())
+            self.assertFalse({Path(name).name for name in model_references(workflow)} & set(expected))
         loader = next(n for n in self.workflow["nodes"] if n["type"] == "DaSiWa_LTX2LoraLoader")
         self.assertTrue(all(slot["lora"] == "None" for slot in json.loads(loader["widgets_values"][0])))
 

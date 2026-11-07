@@ -15,8 +15,8 @@ Use `template-settings.json` when creating the Pod template.
 
 Accept the model access terms at https://huggingface.co/darksidewalker/DaSiWa-LTX2.3.
 Create a RunPod secret named exactly `HF_TOKEN` containing a Hugging Face read
-token authorized for that gated repository and the private `uwgm/nikke-loras`
-repository containing the two optional user LoRAs. Add the `HF_TOKEN` environment
+token authorized for that gated repository and both `uwgm/nikke-loras` and
+`uwgm/nikke-civitai-backup`, which contain the four user LoRAs. Add the `HF_TOKEN` environment
 variable and select that secret using the key icon. The raw representation is:
 
 ```text
@@ -30,8 +30,9 @@ Add the ordinary environment variables from `template-settings.json`. Keep
 `MODEL_PROFILE=dasiwa`, `SKIP_MODEL_DOWNLOAD=0`, and `COMFY_PORT=8188` for the
 normal deployment. Do not override the container start command.
 
-The first start downloads about 48.32 GB plus `FOOT.safetensors` and
-`LTX2.3_reasoning_I2V_V3.safetensors` before ComfyUI listens on
+The first start downloads about 48.32 GB plus `FOOT.safetensors`,
+`LTX2.3_reasoning_I2V_V3.safetensors`, `LTX2.3_CREAMPIE.safetensors` and
+`TentacleMotion.safetensors` before ComfyUI listens on
 port 8188. A temporary RunPod proxy 404 is expected during this phase. Watch the
 Pod logs; later starts reuse complete files and resume `.aria2` partial files from
 the same `/workspace` volume.

@@ -174,8 +174,9 @@ icon, and let RunPod render its reference. In raw form it is:
 HF_TOKEN={{ RUNPOD_SECRET_HF_TOKEN }}
 ```
 
-The token also needs read access to the private `uwgm/nikke-loras` repository
-for the two user-requested LoRAs. No additional environment variable is needed.
+The token also needs read access to `uwgm/nikke-loras` and
+`uwgm/nikke-civitai-backup` for the four user-requested LoRAs. If using a fine-grained
+token, include both repositories. No additional environment variable is needed.
 
 Do not add quotes around the reference. Models use
 Hugging Face and GitHub sources, so `CIVITAI_TOKEN` and private `MODEL_URL_*`
@@ -206,8 +207,8 @@ are not validated by CPU CI. Leave `COMFY_ARGS` empty initially and use
 
 ## First start
 
-The default `dasiwa` profile downloads 13 files: about 48.32 GB of workflow models
-plus the two private user LoRAs. Their sizes are reported at startup.
+The default `dasiwa` profile downloads 15 files: about 48.32 GB of workflow models
+plus the four user LoRAs. Their sizes are reported at startup.
 Gated/private-repository access is checked before starting large downloads.
 ComfyUI starts only after downloads and doctor checks pass,
 so the RunPod HTTP proxy can return 404 during the initial download. Follow the
@@ -216,12 +217,16 @@ Pod logs for live aria2 progress.
 Completed files are validated by exact byte count, safetensors header, and
 SHA-256, then skipped on later starts. `.aria2` partial files are resumed.
 
-`FOOT.safetensors` and `LTX2.3_reasoning_I2V_V3.safetensors` are installed in
-`/workspace/models/loras/LTX2/User/`. They appear in the LoRA selector but are
-not automatically enabled. The original workflow JSON remains unchanged.
+The following user LoRAs are installed in `/workspace/models/loras/LTX2/User/`:
+
+- `FOOT.safetensors` and `LTX2.3_reasoning_I2V_V3.safetensors` from `uwgm/nikke-loras`.
+- `LTX2.3_CREAMPIE.safetensors` and `TentacleMotion.safetensors` from `uwgm/nikke-civitai-backup`.
+
+They appear in the LoRA selector but are not automatically enabled. Existing LoRAs
+and all workflow JSON files remain unchanged.
 On first use, startup obtains their exact size, SHA-256 and commit from the
 authenticated Hugging Face metadata API, then downloads the commit-pinned URLs
-with the existing parallel downloader and verifies both files. Metadata is
+with the existing parallel downloader and verifies all files. Metadata is
 cached in `/workspace/cache/model-metadata/` without credentials and reused on
 restart, including after an interrupted download. Upstream `main` changes do
 not silently replace the cached version. Missing access or integrity metadata
@@ -257,10 +262,10 @@ Only `/tmp/comfy` is intentionally ephemeral.
 
 | Profile | Files | Size | Contents |
 |---|---:|---:|---|
-| `dasiwa` | 13 | 48.32 GB + user LoRAs | DaSiWa V5.1, Last Frame, both RIFE SPAN derivatives and two user LoRAs |
+| `dasiwa` | 15 | 48.32 GB + user LoRAs | DaSiWa V5.1, Last Frame, both RIFE SPAN derivatives and four user LoRAs |
 | `public` | 9 | 55.79 GB | V6.1 models enabled by the graph |
-| `workflow` | 14 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and two user LoRAs |
-| `all` | 23 | 116.45 GB + user LoRAs | all workflows, including bypassed alternate loaders and LoRAs |
+| `workflow` | 16 | 60.39 GB + user LoRAs | `public` plus the three optional concept LoRAs and four user LoRAs |
+| `all` | 25 | 116.45 GB + user LoRAs | all workflows, including bypassed alternate loaders and LoRAs |
 
 The concept LoRAs referenced by V6.1 are included in `workflow`, even though their
 slots are initially off, so enabling them does not require another URL. `all`

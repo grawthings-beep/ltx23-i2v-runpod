@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "profiles": {
-    "dasiwa": "DaSiWa OmniForge C V5.1, including its bypassed DMD, AnimeSharp and RIFE choices and two user LoRAs; HF gated and private repository access is required.",
+    "dasiwa": "DaSiWa OmniForge C V5.1, including its bypassed DMD, AnimeSharp and RIFE choices and four user LoRAs; HF gated and private repository access is required.",
     "public": "Core models enabled by the MrXin LTX 2.3 I2V EROS V6.1 workflow.",
-    "workflow": "Enabled V6.1 models plus its three optional concept LoRAs and two user LoRAs; disabled alternate loaders are excluded.",
+    "workflow": "Enabled V6.1 models plus its three optional concept LoRAs and four user LoRAs; disabled alternate loaders are excluded.",
     "all": "All DaSiWa V5.1 and MrXin V6.1 models, including disabled alternate loaders and LoRAs."
   },
   "models": [
@@ -286,6 +286,28 @@
       "auth": "HF_TOKEN",
       "resolve_hf_metadata": true,
       "notes": "Private user LoRA. Resolve and cache the commit, exact size and SHA256 using HF_TOKEN before downloading. Installed, not enabled in either workflow."
+    },
+    {
+      "id": "uwgm-ltx23-creampie-lora",
+      "filename": "LTX2.3_CREAMPIE.safetensors",
+      "relative_path": "models/loras/LTX2/User/LTX2.3_CREAMPIE.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/LTX2.3_CREAMPIE.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "resolve_hf_metadata": true,
+      "notes": "User-requested LoRA. Resolve and cache the commit, exact size and SHA256 using HF_TOKEN before downloading. Installed without enabling any workflow slot."
+    },
+    {
+      "id": "uwgm-tentacle-motion-lora",
+      "filename": "TentacleMotion.safetensors",
+      "relative_path": "models/loras/LTX2/User/TentacleMotion.safetensors",
+      "url": "https://huggingface.co/uwgm/nikke-civitai-backup/resolve/main/TentacleMotion.safetensors",
+      "source": "huggingface",
+      "profiles": ["dasiwa", "workflow", "all"],
+      "auth": "HF_TOKEN",
+      "resolve_hf_metadata": true,
+      "notes": "User-requested LoRA. Resolve and cache the commit, exact size and SHA256 using HF_TOKEN before downloading. Installed without enabling any workflow slot."
     }
   ]
 }
